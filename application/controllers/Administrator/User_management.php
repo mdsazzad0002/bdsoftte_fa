@@ -342,7 +342,7 @@ class User_management extends CI_Controller
                 }
                 $data['User_Password'] = md5($password);
             }
-            if (!empty($_FILES)) {
+            if (!empty($_FILES) && $_FILES['image']['name'] != '') {
                 $oldImgFile = $this->session->userdata('user_image');
                 if (file_exists($oldImgFile)) {
                     unlink($oldImgFile);
