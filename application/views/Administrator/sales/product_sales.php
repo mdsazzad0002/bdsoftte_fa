@@ -185,8 +185,9 @@
 								<label class="col-xs-3 control-label no-padding-right"> Product </label>
 								<div class="col-xs-9" style="display: flex;align-items:center;margin-bottom:5px;">
 									<div style="width: 86%;">
-										<v-select v-show="!barcode" v-bind:options="products" id="product" style="margin: 0;" v-model="selectedProduct" label="display_text" @input="productOnChange" @search="onSearchProduct"></v-select>
-										<input v-show="barcode" placeholder="barcode here" ref="barcode" v-model="barcodeVal" type="text" class="form-control" @change="barcodeProduct($event)" />
+										<v-select v-show="!barcode" v-bind:options="products" ref="mySelect" id="product" style="margin: 0;" v-model="selectedProduct" label="display_text" @input="productOnChange" @search="onSearchProduct"></v-select>
+
+										<input v-show="barcode" placeholder="barcode here" ref="barcode" v-model="barcodeVal" type="text"  id="Productbarcode"  class="form-control" @change="barcodeProduct($event)" />
 									</div>
 									<div style="width: 13%;margin-left:2px;">
 										<a class="add-button" @click="barcode = !barcode"><i class="fa fa-barcode" aria-hidden="true"></i></a>
@@ -201,7 +202,7 @@
 								</div>
 								<label class="col-xs-1 control-label no-padding-right"> Qty </label>
 								<div class="col-xs-4">
-									<input type="number" step="0.01" id="quantity" placeholder="Qty" class="form-control" ref="quantity" v-model="selectedProduct.quantity" v-on:input="productTotal" autocomplete="off" required />
+									<input type="number" step="0.01" id="quantity" placeholder="Qty" class="form-control" @change="cartCall($event)" ref="quantity" v-model="selectedProduct.quantity" v-on:input="productTotal" autocomplete="off" required />
 								</div>
 							</div>
 							<div class="form-group">
@@ -596,6 +597,30 @@
 			if (this.sales.salesId != 0) {
 				await this.getSales();
 			}
+
+			document.addEventListener('keydown', (e) => {
+				 if (event.shiftKey && (event.key === 'Enter' || event.keyCode === 13)) {
+					// Handle Shift + Enter (e.g., submit form)
+					this.saveSales();
+	
+				}else if(event.shiftKey && (event.key === 'p' || event.keyCode === 80)){
+					if(this.barcode){
+						this.barcode = false;
+						setTimeout(() => {
+							 this.$refs.mySelect.$el.querySelector('input').focus();
+						},400)
+					}else{
+						this.barcode = true;
+						setTimeout(() => {
+							$('#Productbarcode').focus();
+						},200)
+					}
+				}
+
+			})
+			setTimeout(() => {
+				$('#Productbarcode').focus();
+			},200)
 		},
 		methods: {
 			getBank() {
@@ -901,6 +926,14 @@
 					this.productTotal();
 				}
 			},
+			cartCall(event) {
+				if(event.target.value != '' && event.target.value != 0 && event.target.value != null && event.target.value != undefined){
+					this.addToCart(); 
+					// $('#product').focus();
+					  this.$refs.mySelect.$el.querySelector('input').focus();
+
+				}
+			},
 			addToCart() {
 				let product = {
 					productId: this.selectedProduct.Product_SlNo,
@@ -920,10 +953,12 @@
 					return;
 				}
 
-				if ((product.quantity == 0 || product.quantity == '') && !this.barcode) {
+				if ((product.quantity == 0 || product.quantity == '' || !product.quantity) && !this.barcode) {
 					alert('Enter quantity');
 					return;
 				}
+// console.log(this.barcode, product.quantity);
+				
 
 				// if ((product.salesRate == 0 || product.salesRate == '') && !this.barcode) {
 				// 	alert('Enter sales rate');
@@ -984,12 +1019,16 @@
 
 				if (event.target.id == 'cashPaid' || this.bankCart.length > 0) {
 					this.sales.paid = parseFloat(parseFloat(this.sales.cashPaid) + parseFloat(this.sales.bankPaid)).toFixed(2);
-					if (parseFloat(this.sales.paid) > parseFloat(this.sales.total)) {
+					console.log('total paid', this.sales.paid, this.sales.cashPaid, this.sales.bankPaid);
+					if(this.sales.paid == this.sales.total){
+						this.sales.returnAmount = 0;
+						this.sales.due = 0;
+					}else if (parseFloat(this.sales.paid) > parseFloat(this.sales.total)) {
 						this.sales.returnAmount = parseFloat(this.sales.paid - this.sales.total).toFixed(2);
 						this.sales.due = 0;
 					} else {
 						this.sales.returnAmount = 0;
-						this.sales.due = parseFloat(this.sales.paid).toFixed(2);
+						this.sales.due = parseFloat(this.sales.total - this.sales.paid).toFixed(2);
 					}
 				} else {
 					this.sales.cashPaid = this.sales.total;
@@ -999,7 +1038,7 @@
 					this.sales.returnAmount = 0;
 				}
 				
-				this.sales.due =	this.sales.total - this.sales.bankPaid - this.sales.cashPaid
+				// this.sales.due =	this.sales.total - this.sales.bankPaid - this.sales.cashPaid
 
 			},
 

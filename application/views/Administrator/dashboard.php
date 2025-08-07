@@ -30,12 +30,18 @@ $companyInfo = $this->db->query("select * from tbl_company c order by c.Company_
 
 
 $module = $this->session->userdata('module');
-if ($module == 'dashboard' or $module == '') { ?>
+// var_dump($this->session->userdata('accountType'));
+// // exit();
+if(($module == 'dashboard' || $module == '' ) && $this->session->userdata('accountType') == 'u'){
+	$this->session->set_userdata('module', 'SalesModule');
+	redirect('/module/SalesModule');
+
+}else if ($module == 'dashboard' or $module == '') { ?>
 	<div class="row">
 		<div class="col-md-12 col-xs-12">
 			<!-- Header Logo -->
 			<div class="col-md-12 header" style="height: 130px;box-shadow:none;">
-				<img src="<?php echo base_url(); ?>assets/images/headerbg.jpg" style="border-radius: 20px;border: 1px solid #007ebb;box-shadow: 0px 5px 0px 0px #007ebb;" class="img img-responsive center-block">
+				<img src="<?php echo base_url().'uploads/'.$companyInfo->banner_img; ?>" style="border-radius: 20px;border: 1px solid #007ebb;box-shadow: 0px 5px 0px 0px #007ebb;" class="img img-responsive center-block">
 			</div>
 			<div class="col-md-10 col-md-offset-1" style="border-top: 1px solid gray;padding-top: 10px;">
 				<div class="col-md-3 col-xs-6 section4">

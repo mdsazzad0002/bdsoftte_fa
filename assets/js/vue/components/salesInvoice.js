@@ -16,17 +16,25 @@ const salesInvoice = Vue.component('sales-invoice', {
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-7">
-                        <strong>Customer Id:</strong> {{ sales.Customer_Code }}<br>
-                        {{ sales.Customer_Name }}<br>
-                        {{ sales.Customer_Address }}<br>
-                        {{ sales.Customer_Mobile }}<br>
+                    <div class="col-xs-6">
+                     
+                       <strong>Name:</strong> {{ sales.Customer_Name }}<br>
+                       <strong>Address:</strong> {{ sales.Customer_Address }}<br>
+                       <strong>Mobile:</strong> {{ sales.Customer_Mobile }}<br>
                         <span v-if="sales.Project_Name"> <strong>Project:</strong> {{ sales.Project_Name }} </span>
                     </div>
-                    <div class="col-xs-5 mobile-second-section">
-                        <strong>SalesBy:</strong> {{ sales.AddBy }}<br>
+                    <div class="col-xs-6 mobile-second-section">
+                     
+                     
+                      
+                    <div>
+                        <strong>Cashier:</strong> {{ sales.AddBy }}<br>
+                    </div>
+                    <div style="white-space:nowrap;">
                         <strong>Invoice:</strong> {{ sales.SaleMaster_InvoiceNo }}<br>
-                        <strong>Date:</strong> {{ sales.SaleMaster_SaleDate }} {{ sales.AddTime | formatDateTime('h:mm a') }}<br>
+                    </div>    
+                        <strong>Date:</strong> {{ sales.SaleMaster_SaleDate }} <br>
+                        <strong>Time:</strong> {{ sales.AddTime | formatDateTime('h:mm a') }}<br>
                         <span v-if="sales.Employee_Name"> <strong>Employee:</strong> {{ sales.Employee_Name }} </span>
                     </div>
                 </div>
@@ -37,8 +45,23 @@ const salesInvoice = Vue.component('sales-invoice', {
                 </div>
                 <div class="row">
                     <div class="col-xs-12">
+                       <table _a584de>
+                            <thead>
+                               <tr>
+                                    <td >   <strong>Previous Point:</strong> {{  sales.customerPoint - sales.point + parseInt(sales.pointAmount) }}<br></td>
+                                    <td >   <strong>New Point:</strong> {{ sales.point }}<br></td>
+                                    <td>  <strong>Used Point:</strong> {{parseInt(sales.pointAmount) }}<br></td>
+                                    <td>  <strong>Total Point:</strong> {{sales.customerPoint }}<br></td>
+                                   
+                                </tr>
+                            </thead>
+                            </table>
+                            <br/>
+                       
+
                         <table _a584de>
                             <thead>
+                             
                                 <tr>
                                     <td>Sl.</td>
                                     <td>Product Description</td>
@@ -66,25 +89,18 @@ const salesInvoice = Vue.component('sales-invoice', {
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-6 text-left">
-                        <div v-if="sales.SaleMaster_bankPaid > 0" style="margin:0; margin-top:10px; border-bottom: 1px solid gray; padding-bottom: 5px;">
-                            <table _a584de>
-                                <tr>
-                                    <td style="font-weight:700;">Sl</td>
-                                    <td style="font-weight:700;">Bank Name</td>
-                                    <td style="font-weight:700;">Amount</td>
-                                </tr>
-                                <tr v-for="(bank, sl) in banks">
-                                    <td>{{sl}}</td>
-                                    <td>{{bank.bank_name}} - {{bank.account_number}}</td>
-                                    <td>{{bank.amount}}</td>
-                                </tr>
-                            </table>
-                        </div>
+                    <div class="col-xs-4 text-left">
+               
                         <br>
-                        <strong>In Word: </strong> {{ convertNumberToWords(sales.SaleMaster_TotalSaleAmount) }}
+                        <br>
+                        <br>
+                        <br>
+                        <br>
+                
+                        <br>
+                       
                     </div>
-                    <div class="col-xs-6">
+                    <div class="col-xs-8">
                         <table _t92sadbc2>
                             <tr>
                                 <td><strong>Sub Total:</strong></td>
@@ -94,7 +110,7 @@ const salesInvoice = Vue.component('sales-invoice', {
                                 <td><strong>Discount (-):</strong></td>
                                 <td style="text-align:right">{{ sales.SaleMaster_TotalDiscountAmount }}</td>
                             </tr>
-                            <tr v-show="sales.pointAmount > 0" style="display: none;" :style="{display: sales.pointAmount > 0 ? '' : 'none'}">
+                           <tr v-show="sales.pointAmount > 0" style="display: none;" :style="{display: sales.pointAmount > 0 ? '' : 'none'}" >
                                 <td><strong>Point (-):</strong></td>
                                 <td style="text-align:right">{{ sales.pointAmount }}</td>
                             </tr>
@@ -103,8 +119,23 @@ const salesInvoice = Vue.component('sales-invoice', {
                                 <td><strong>Total:</strong></td>
                                 <td style="text-align:right">{{ sales.SaleMaster_TotalSaleAmount }}</td>
                             </tr>
+                     
+                            <tr v-for="(bank, sl) in banks" hidden>
+                                <td><strong>{{bank.bank_name}} - {{bank.account_number}}(Bank)</strong></td>
+                                <td  style="text-align:right">{{bank.amount}}</td>
+                            </tr>
+                        
                             <tr>
-                                <td><strong>Paid:</strong></td>
+                                <td><strong>Paid: (Bank)</strong></td>
+                                <td style="text-align:right">{{ sales.SaleMaster_bankPaid }}</td>
+                            </tr>
+                        
+                            <tr>
+                                <td><strong>Paid: (Cash)</strong></td>
+                                <td style="text-align:right">{{ sales.SaleMaster_cashPaid }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Paid:</strong></td>
                                 <td style="text-align:right">{{ sales.SaleMaster_PaidAmount }}</td>
                             </tr>
                             <tr>
@@ -113,8 +144,20 @@ const salesInvoice = Vue.component('sales-invoice', {
                             </tr>
                         </table>
                     </div>
+                    <div class="col-xs-12 text-center">
+                    
+                <br/>
+                     <strong class="">In Word: </strong> {{ convertNumberToWords(sales.SaleMaster_TotalSaleAmount) }}
+                    </div>
                 </div>
+              
+               
+                <br/>
+                             <div style="width: 100%;text-align:center;" v-if="companyProfile">
+                                <strong v-html="companyProfile.invoice_footer">  </strong>
+                            </div>
             </div>
+
         </div>
     `,
     props: ['sales_id'],
@@ -154,6 +197,13 @@ const salesInvoice = Vue.component('sales-invoice', {
         this.setStyle();
         this.getSales();
         this.getCurrentBranch();
+        this.getCompanyProfile();
+
+        document.addEventListener('keydown', (e) => {
+           if(event.shiftKey && (event.key === 'p' || event.keyCode === 80)){
+              this.print()
+            }
+        })
     },
     methods: {
         getSales() {
@@ -162,6 +212,11 @@ const salesInvoice = Vue.component('sales-invoice', {
                 this.banks = res.data.banks;
                 this.cart = res.data.saleDetails;
             })
+        },
+        getCompanyProfile() {
+            axios.get('/get_company_profile').then(res => {
+                this.companyProfile = res.data;
+            });
         },
         getCurrentBranch() {
             axios.get('/get_current_branch').then(res => {
@@ -181,9 +236,9 @@ const salesInvoice = Vue.component('sales-invoice', {
                     border-bottom: 1px dotted #454545;
                 }
                 div[_d9283dsc]{
-                    padding-bottom:25px;
-                    border-bottom: 1px solid #ccc;
-                    margin-bottom: 15px;
+                    padding-bottom:0px;
+                    border-bottom: 0px solid #ccc;
+                    margin-bottom: 0px;
                 }
                 table[_a584de]{
                     width: 100%;
@@ -309,22 +364,13 @@ const salesInvoice = Vue.component('sales-invoice', {
                                 }
                             </style>
                         </head>
-                        <body style="position: relative;">
+                        <body>
                             <div style="text-align:center;">
-                                <img src="/uploads/company_profile_thum/${this.currentBranch.Company_Logo_org}" alt="Logo" style="height:150px;margin:0px;" /><br>
-                                <strong style="font-size:25px;">${this.currentBranch.Company_Name}</strong>
-                                <br>
-                                <br>
+                                <img src="/uploads/company_profile_thum/${this.currentBranch.Company_Logo_org}" alt="Logo" style="height:120px;margin:0px;" /><br>
+                                <strong style="font-size:22px;">${this.currentBranch.Company_Name}</strong><br>
                                 <p style="white-space:pre-line;">${this.currentBranch.Repot_Heading}</p>
                             </div>
                             ${invoiceContent}
-                            
-                            <br/>
-                            <br/>
-                            <div style="width: 100%;text-align:center;">
-                                <strong> Thank you for shopping with family bazar. Purchase of defected item must be exchanged by 24 hours with invoice. For any queries, suggestions or complaints, please call 01921457676 (9:00 AM - 6:00 PM) </strong>
-                            </div>
-                            
                         </body>
                     </html>
                 `);
@@ -350,6 +396,8 @@ const salesInvoice = Vue.component('sales-invoice', {
                     <body>
                         <div class="row">
                             <div class="col-xs-2"><img src="/uploads/company_profile_thum/${this.currentBranch.Company_Logo_org}" alt="Logo" style="height:80px;" /></div>
+                            </br/>
+                            </br/>
                             <div class="col-xs-10" style="padding-top:20px;">
                                 <strong style="font-size:18px;">${this.currentBranch.Company_Name}</strong><br>
                                 <p style="white-space:pre-line;">${this.currentBranch.Repot_Heading}</p>

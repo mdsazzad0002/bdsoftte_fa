@@ -1,3 +1,4 @@
+
 <style>
 	.v-select {
 		width: 100%;
@@ -38,7 +39,7 @@
 					<label class="col-xs-1 control-label">:</label>
 					<div class="col-xs-6">
 						<select class="form-control" style="padding:0;" name="branch_id" v-model="user.branch_id" id="branch_id">
-							<option value="1">Family Bazar</option>
+							<option value="1" v-if="companyProfile">{{companyProfile.Company_Name}}</option>
 						</select>
 						<div id="brand_" class="col-xs-12"></div>
 					</div>
@@ -214,12 +215,14 @@
 				per_page: 100,
 				filter: '',
 
-				userId: '<?php echo $this->session->userdata("userId"); ?>'
+				userId: '<?php echo $this->session->userdata("userId"); ?>',
+				companyProfile: null
 			}
 		},
 		created() {
 			this.getBranches();
 			this.getUsers();
+			this.getCompanyProfile();
 		},
 		methods: {
 			getBranches() {
@@ -234,6 +237,11 @@
 						return item;
 					});
 				})
+			},
+			getCompanyProfile() {
+				axios.get('/get_company_profile').then(res => {
+					this.companyProfile = res.data;
+				});
 			},
 			saveUser() {
 				if (this.user.FullName == '') {

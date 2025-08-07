@@ -387,6 +387,7 @@ class Page extends CI_Controller {
         $data['Company_Name']=  $this->input->post('Company_name',true);
         $data['Repot_Heading']=  $this->input->post('Description',true);
         $data['print_type'] = $this->input->post('inpt',true);
+        $data['invoice_footer'] = $this->input->post('invoice_footer',true);
         
         if(isset($_FILES['companyLogo']) && $_FILES['companyLogo']['error'] != UPLOAD_ERR_NO_FILE)
         {   
@@ -427,6 +428,45 @@ class Page extends CI_Controller {
             $this->image_lib->resize();
             $data['Company_Logo_thum'] = $this->upload->file_name;                 
         }
+
+        if(isset($_FILES['login_img']) && $_FILES['login_img']['error'] != UPLOAD_ERR_NO_FILE)
+        {
+            $this->load->library('upload');
+            $config = array();
+            $config['upload_path']      = './uploads/';
+            $config['allowed_types']    = 'jpg|jpeg|png|gif';
+            $config['max_size']         = '0';
+            $config['file_name']        = 'login_img'; 
+            $config['overwrite']        = FALSE;
+
+            $this->upload->initialize($config);
+            $this->upload->do_upload('login_img');
+            $image = $this->upload->data();
+            $data['login_img'] = $image['file_name'];
+
+
+        }
+
+
+        if(isset($_FILES['banner_img']) && $_FILES['banner_img']['error'] != UPLOAD_ERR_NO_FILE)
+        {
+            $this->load->library('upload');
+            $config = array();
+            $config['upload_path']      = './uploads/';
+            $config['allowed_types']    = 'jpg|jpeg|png|gif';
+            $config['max_size']         = '0';
+            $config['file_name']        = 'banner_img'; 
+            $config['overwrite']        = FALSE;
+
+            $this->upload->initialize($config);
+            $this->upload->do_upload('banner_img');
+            $image = $this->upload->data();
+            $data['banner_img'] = $image['file_name'];
+        }
+
+
+
+
         $this->db->update('tbl_company', $data);
         redirect('Administrator/Page/company_profile');
     }

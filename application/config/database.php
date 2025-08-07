@@ -13,6 +13,7 @@ $db['default'] = array(
 	// 'database' => 'bdsoftte_fa',
 
 
+
 	'username' => 'root',
 	'password' => '',
 	'database' => 'bdsoftte_fa',

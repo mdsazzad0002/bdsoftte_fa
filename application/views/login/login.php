@@ -19,7 +19,7 @@
 	<div class="container">
 		<div class="cover">
 			<div class="front" style="border-right: 1px dashed #2d402d;">
-				<img src="<?php echo base_url(); ?>assets/login/images/login.jpg" alt="">
+				<img src="<?php echo base_url().'uploads/'.$company->login_img; ?>" alt="">
 				<div class="text">
 					<span class="text-1">Online Super Shop Software</span>
 				</div>
