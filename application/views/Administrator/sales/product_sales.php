@@ -593,6 +593,7 @@
 			await this.getBranches();
 			await this.getCustomers();
 			this.getProducts();
+			
 
 			if (this.sales.salesId != 0) {
 				await this.getSales();
@@ -641,7 +642,7 @@
 					return
 				}
 				this.clearProduct();
-				this.getProducts();
+				
 			},
 
 			getEmployees() {
@@ -776,6 +777,27 @@
 					} else {
 						this.products = res.data;
 					}
+					this.getPackages();
+				})
+			},
+			getPackages(data1 = null) {
+				let data = {
+					name: data1 == null ? '' : data1.name
+				}
+				axios.post('/get_packages',data).then(res => {
+					let data = res.data.map(item => {
+						
+							item.display_text = 'Package: ' + item.packageName + ' (' + item.comboInvoice + ')';
+							item.Product_SellingPrice = item.total;
+							item.Product_Name = item.packageName;
+							item.Product_Code = item.comboInvoice;
+							item.Product_Purchase_Rate = parseFloat(item.purchase_price).toFixed(2);
+							item.ProductCategory_Name = 'Package';
+							item.type = 'package';
+							return item;
+						
+					})
+					this.products.unshift(...res.data);
 				})
 			},
 			async onSearchProduct(val, loading) {
@@ -789,7 +811,9 @@
 						.then(res => {
 							let r = res.data;
 							this.products = r.filter(item => item.status == 'a');
+							this.getPackages({name: val});
 							loading(false)
+
 						})
 				} else {
 					loading(false)
@@ -838,7 +862,9 @@
 						this.selectedProduct.Product_SellingPrice = 0;
 					}
 					this.productStock = await axios.post('/get_product_stock', {
-						productId: this.selectedProduct.Product_SlNo
+						productId: this.selectedProduct.Product_SlNo ? this.selectedProduct.Product_SlNo : this.selectedProduct.ComboId,
+						isPackage: this.selectedProduct.ComboId ? true : false
+
 					}).then(res => {
 						return res.data;
 					})
@@ -928,15 +954,15 @@
 			},
 			cartCall(event) {
 				if(event.target.value != '' && event.target.value != 0 && event.target.value != null && event.target.value != undefined){
-					this.addToCart(); 
-					// $('#product').focus();
-					  this.$refs.mySelect.$el.querySelector('input').focus();
+					// this.addToCart(); 
+					// // $('#product').focus();
+					//   this.$refs.mySelect.$el.querySelector('input').focus();
 
 				}
 			},
 			addToCart() {
 				let product = {
-					productId: this.selectedProduct.Product_SlNo,
+					productId: this.selectedProduct.Product_SlNo ? this.selectedProduct.Product_SlNo : this.selectedProduct.ComboId,
 					productCode: this.selectedProduct.Product_Code,
 					categoryName: this.selectedProduct.ProductCategory_Name,
 					name: this.selectedProduct.Product_Name,
@@ -945,7 +971,8 @@
 					quantity: this.selectedProduct.quantity,
 					total: this.selectedProduct.total,
 					purchaseRate: this.selectedProduct.Product_Purchase_Rate,
-					isFree: this.isFree
+					isFree: this.isFree,
+					type: this.selectedProduct.ComboId ? 'package' : 'product'
 				}
 
 				if (product.productId == '' && !this.barcode) {
@@ -1015,11 +1042,11 @@
 				} else {
 					this.discountPercent = (parseFloat(this.sales.discount) / parseFloat(this.sales.subTotal) * 100).toFixed(2);
 				}
-				this.sales.total = ((parseFloat(this.sales.subTotal) + parseFloat(this.sales.vat) + parseFloat(this.sales.transportCost)) - parseFloat(+this.sales.discount + +this.sales.pointAmount)).toFixed(2);
-
+				this.sales.total = ((parseFloat(this.sales.subTotal) + parseFloat(this.sales.vat ) + parseFloat(this.sales.transportCost)) - parseFloat(+this.sales.discount + +this.sales.pointAmount)).toFixed(2);
+		// console.log('total paid',this.sales);
 				if (event.target.id == 'cashPaid' || this.bankCart.length > 0) {
 					this.sales.paid = parseFloat(parseFloat(this.sales.cashPaid) + parseFloat(this.sales.bankPaid)).toFixed(2);
-					console.log('total paid', this.sales.paid, this.sales.cashPaid, this.sales.bankPaid);
+					// console.log('total paid', this.sales.paid, this.sales.cashPaid, this.sales.bankPaid, this.sales.total);
 					if(this.sales.paid == this.sales.total){
 						this.sales.returnAmount = 0;
 						this.sales.due = 0;

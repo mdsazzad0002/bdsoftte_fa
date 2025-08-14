@@ -188,6 +188,9 @@ $route['delete_combo_package'] = 'Administrator/Combo_package/deleteComboPackage
 $route['get_combo_packages'] = 'Administrator/Combo_package/getComboPackages';
 $route['combo_package_details'] = 'Administrator/Combo_package/combo_package_details';
 $route['get_combo_packages'] = 'Administrator/Combo_package/getComboPackageDetails';
+$route['update_combo_package_stock'] = 'Administrator/Combo_package/update_combo_package_stock';
+
+$route['get_packages'] = 'Administrator/Combo_package/getPackages';
 
 
 

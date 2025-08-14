@@ -82,7 +82,7 @@
 	</div>
 
 
-	<div class="col-xs-12 col-md-9 col-lg-9">
+	<form class="col-xs-12 col-md-9 col-lg-9" @submit.prevent="cartCall($event)">
 		<div class="widget-box">
 			<div class="widget-header">
 				<h4 class="widget-title">Combo Package Information</h4>
@@ -145,7 +145,7 @@
 								</div>
 								<label class="col-xs-1 control-label no-padding-right"> Qty </label>
 								<div class="col-xs-4">
-									<input type="number" step="0.01" id="quantity" placeholder="Qty" class="form-control" @change="cartCall($event)" ref="quantity" v-model="selectedProduct.quantity" v-on:input="productTotal" autocomplete="off" required />
+									<input type="number" step="0.01" id="quantity" placeholder="Qty" class="form-control" ref="quantity" v-model="selectedProduct.quantity" v-on:input="productTotal" autocomplete="off" required />
 								</div>
 							</div>
 							<div class="form-group">
@@ -210,7 +210,7 @@
 				</table>
 			</div>
 		</div>
-	</div>
+	</form>
 
 
 	<div class="col-xs-12 col-md-3 col-lg-3">
@@ -351,26 +351,26 @@
 				await this.getSales();
 			}
 
-			document.addEventListener('keydown', (e) => {
-				 if (event.shiftKey && (event.key === 'Enter' || event.keyCode === 13)) {
-					// Handle Shift + Enter (e.g., submit form)
-					this.saveSales();
+			// document.addEventListener('keydown', (e) => {
+			// 	 if (event.shiftKey && (event.key === 'Enter' || event.keyCode === 13)) {
+			// 		// Handle Shift + Enter (e.g., submit form)
+			// 		this.saveSales();
 	
-				}else if(event.shiftKey && (event.key === 'p' || event.keyCode === 80)){
-					if(this.barcode){
-						this.barcode = false;
-						setTimeout(() => {
-							 this.$refs.mySelect.$el.querySelector('input').focus();
-						},400)
-					}else{
-						this.barcode = true;
-						setTimeout(() => {
-							$('#Productbarcode').focus();
-						},200)
-					}
-				}
+			// 	}else if(event.shiftKey && (event.key === 'p' || event.keyCode === 80)){
+			// 		if(this.barcode){
+			// 			this.barcode = false;
+			// 			setTimeout(() => {
+			// 				 this.$refs.mySelect.$el.querySelector('input').focus();
+			// 			},400)
+			// 		}else{
+			// 			this.barcode = true;
+			// 			setTimeout(() => {
+			// 				$('#Productbarcode').focus();
+			// 			},200)
+			// 		}
+			// 	}
 
-			})
+			// })
 			setTimeout(() => {
 				$('#Productbarcode').focus();
 			},200)
@@ -546,9 +546,11 @@
 			},
 			cartCall(event) {
 				if(event.target.value != '' && event.target.value != 0 && event.target.value != null && event.target.value != undefined){
-					this.addToCart(); 
+					
+						this.addToCart(); 
+						this.$refs.mySelect.$el.querySelector('input').focus();
+					
 					// $('#product').focus();
-					  this.$refs.mySelect.$el.querySelector('input').focus();
 
 				}
 			},
@@ -671,6 +673,11 @@
 				}
 
 				let url = "/update_combo_package";
+
+				if(this.sales.packageName == '' || this.sales.packageName == null){
+					alert('Enter Package Name');
+					return;
+				}
 	
 
 				if (this.selectedEmployee != null && this.selectedEmployee.Employee_SlNo != null) {

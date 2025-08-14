@@ -63,7 +63,8 @@ class Combo_package extends CI_Controller
             'update_by' => $this->session->userdata('FullName'),
             'add_time' => date('Y-m-d H:i:s'),
             'update_time' => date('Y-m-d H:i:s'),
-            'packageName' => $data->sales->packageName
+            'packageName' => $data->sales->packageName,
+            'branch_id' => $this->session->userdata('BRANCHid')
 
         ];
 
@@ -111,13 +112,38 @@ class Combo_package extends CI_Controller
         if(!$package_master){
             redirect('combo_package');
         }
-        $package_data  = $this->db->query("select * from tbl_combom_details left join tbl_product on tbl_product.Product_SlNo = tbl_combom_details.product_id where id = ? ", $invoice_id)->result();
+        $package_data  = $this->db->query("select * from tbl_combom_details left join tbl_product on tbl_product.Product_SlNo = tbl_combom_details.product_id where combo_master_id = ? ", $invoice_id)->result();
 
         $data['title'] = "Combo Package";
         $data['package_data'] = $package_data;
         $data['package_master'] = $package_master;
         $data['content'] = $this->load->view('Administrator/combo_package/invoice_details', $data, TRUE);
         $this->load->view('Administrator/index', $data);
+    }
+
+
+    public function getPackages(){
+        $data = $this->input->post();
+        $data = json_decode($this->input->raw_input_stream);
+        
+        $data_result = $this->db->query("select * from tbl_combomaster ")->result();
+        echo json_encode($data_result);
+        exit();
+    }
+
+    public function update_combo_package_stock()  {
+        $data = $this->input->post();
+        $data = json_decode($this->input->raw_input_stream);
+        $qty = $data->stockQty;
+        if($data->addStock == true){
+            $qty = $data->stockQty + $data->newstock;
+        }else{
+            $qty = $data->stockQty - $data->newstock;
+        }
+      
+        $this->db->query("update tbl_combomaster set stockQty = ? where ComboId = ?", [$qty, $data->ComboId]);
+        echo json_encode(['success' => true, 'message' => 'Combo Package quantity updated successfully']);
+        
     }
 }
 

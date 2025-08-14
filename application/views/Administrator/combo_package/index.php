@@ -122,7 +122,7 @@
 							<th>Package No.</th>
 							<th>Date</th>
 							<th>Package Name</th>
-							
+							<th>Stock</th>
 							<th>Total</th>
 							<th>Action</th>
 						</tr>
@@ -133,11 +133,13 @@
 								<td>{{ sale.comboInvoice }}</td>
 								<td>{{ sale.add_time }}</td>
 								<td>{{ sale.packageName }}</td>
+								<td>{{ sale.stockQty }}</td>
 								<td>{{ sale.total }}</td>
 								
 								<td style="text-align:center;">
 									<a href="" title="Sale Invoice" v-bind:href="`/combo_package/${sale.ComboId}`" target="_blank"><i class="fa fa-file"></i></a>
 							
+                                    <a href="javascript:" title="Update Sale" @click="selectedForStock(sale)">Update Stock</a>
                                     <a href="javascript:" title="Edit Sale" @click="checkReturnAndEdit(sale)"><i class="fa fa-edit"></i></a>
                                     <a href="" title="Delete Sale" @click.prevent="deleteSale(sale.ComboId)"><i class="fa fa-trash"></i></a>
 									
@@ -154,6 +156,39 @@
 			</div>
 		</div>
 	</div> 
+	<!-- modal for multiple bank account -->
+	<div class="modal fade PackageStock" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-md" role="document">
+			<div class="modal-content" style="border-radius: 10px;">
+				<div class="modal-header" style="display: flex; align-items: center; justify-content: space-between;background: #66853e;border-top-left-radius: 10px;border-top-right-radius: 10px;">
+					<h5 class="modal-title" style="width:90%;margin: 0;color: #ffffff;">Package Stock</h5>
+					<button type="button" style="width: 10%; margin: 0px; display: flex; align-items: center; justify-content: end;" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true" style="margin: 0;font-size: 20px;">X</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form @submit.prevent="packageStockUpdate" v-if="selected_sale">
+							<div>
+								Current Stock
+								<input type="text" class="form-control" id="stockQty" v-model="selected_sale.stockQty" placeholder="Stock" readonly />
+							</div>
+							<div>
+								New Stock
+								<input type="number" class="form-control" id="stockQty" v-model="selected_sale.newstock" placeholder="Stock" />
+							</div>
+							<div>
+								<input type="checkbox" value="1" checked v-model="selected_sale.addStock" id="type"> <label for="type">Do you want add stock ? else deduct.</label>
+							</div>
+							<div style="margin-top: 10px;">
+								<input type="submit" class="btn btn-primary" value="Update Stock">
+
+							</div>
+					</form>
+					
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <script src="<?php echo base_url(); ?>assets/js/vue/vue.min.js"></script>
@@ -183,10 +218,35 @@
 				categories: [],
 				selectedCategory: null,
 				sales: [],
+				selected_sale: null,
+
 		
 			}
 		},
 		methods: {
+			packageStockUpdate() {
+				
+				axios.post('/update_combo_package_stock', this.selected_sale)
+					.then(res => {
+						let r = res.data;
+						alert(r.message);
+						if(r.success){
+							this.getSalesRecord();
+						}
+						$('.PackageStock').modal('hide');
+					})
+					.catch(error => {
+						if (error.response) {
+							alert(`${error.response.status}, ${error.response.statusText}`);
+						}
+					})
+			},
+			selectedForStock(sales) {
+				this.selected_sale = sales;
+				this.selected_sale.addStock = true;
+				this.selected_sale.newstock = 0;
+				$('.PackageStock').modal('show');
+			},
 	
 			getSearchResult() {
 			

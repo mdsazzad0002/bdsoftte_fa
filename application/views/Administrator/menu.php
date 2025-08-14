@@ -415,14 +415,14 @@ if ($module == 'dashboard' or $module == '') {
 		<li class="">
 			<a href="<?php echo base_url(); ?>combo_package">
 				<i class="menu-icon fa fa-list"></i>
-				<span class="menu-text"> Package Record </span>
+				<span class="menu-text"> Combo  Record </span>
 			</a>
 			<b class="arrow"></b>
 		</li>
 		<li class="">
 			<a href="<?php echo base_url(); ?>add_combo_package">
 				<i class="menu-icon fa fa-list"></i>
-				<span class="menu-text">Add Package Record </span>
+				<span class="menu-text">Combo  Add </span>
 			</a>
 			<b class="arrow"></b>
 		</li>
