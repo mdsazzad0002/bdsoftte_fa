@@ -412,21 +412,6 @@ if ($module == 'dashboard' or $module == '') {
 			</li>
 		<?php endif; ?>
 
-		<li class="">
-			<a href="<?php echo base_url(); ?>combo_package">
-				<i class="menu-icon fa fa-list"></i>
-				<span class="menu-text"> Combo  Record </span>
-			</a>
-			<b class="arrow"></b>
-		</li>
-		<li class="">
-			<a href="<?php echo base_url(); ?>add_combo_package">
-				<i class="menu-icon fa fa-list"></i>
-				<span class="menu-text">Combo  Add </span>
-			</a>
-			<b class="arrow"></b>
-		</li>
-
 		<?php if (array_search("exchange", $access) > -1 || isset($CheckSuperAdmin) || isset($CheckAdmin)) : ?>
 			<li class="">
 				<a href="<?php echo base_url(); ?>exchange">

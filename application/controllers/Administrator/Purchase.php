@@ -488,6 +488,7 @@ class Purchase extends CI_Controller
                 'PurchaseMaster_DueAmount' => $data->purchase->due,
                 'previous_due' => $data->purchase->previousDue,
                 'PurchaseMaster_Description' => $data->purchase->note,
+                
                 'status' => 'a',
                 'AddBy' => $this->session->userdata("FullName"),
                 'AddTime' => date('Y-m-d H:i:s'),
@@ -517,6 +518,8 @@ class Purchase extends CI_Controller
                     'PurchaseDetails_TotalAmount'   => $product->total,
                     'isFree'                        => $product->isFree,
                     'Status'                        => 'a',
+                    'imei'                          => $product->imei,
+                    'newproduct'                    => $product->newproduct,
                     'AddBy'                         => $this->session->userdata("FullName"),
                     'AddTime'                       => date('Y-m-d H:i:s'),
                     'PurchaseDetails_branchID'      => $this->session->userdata('BRANCHid')
@@ -524,12 +527,21 @@ class Purchase extends CI_Controller
 
                 $this->db->insert('tbl_purchasedetails', $purchaseDetails);
 
-                $inventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?", [$product->productId, $this->session->userdata('BRANCHid')])->num_rows();
+                $imei_cluse = '';
+                if($product->imei != null){
+                    $imei_cluse = " and imei = '$product->imei'";
+                }else{
+                    $imei_cluse = " and imei  IS  NULL";
+                }
+
+
+                $inventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?" . $imei_cluse, [$product->productId, $this->session->userdata('BRANCHid')])->num_rows();
                 if ($inventoryCount == 0) {
                     $inventory = array(
                         'product_id' => $product->productId,
                         'purchase_quantity' => $product->quantity,
-                        'branch_id' => $this->session->userdata('BRANCHid')
+                        'branch_id' => $this->session->userdata('BRANCHid'),
+                        'imei' => $product->imei
                     );
 
                     $this->db->insert('tbl_currentinventory', $inventory);
@@ -539,21 +551,23 @@ class Purchase extends CI_Controller
                         set purchase_quantity = purchase_quantity + ? 
                         where product_id = ? 
                         and branch_id = ?
-                    ", [$product->quantity, $product->productId, $this->session->userdata('BRANCHid')]);
+                    " . $imei_cluse, [$product->quantity, $product->productId, $this->session->userdata('BRANCHid')]);
                 }
 
                 // $this->db->query("update tbl_product set Product_Purchase_Rate = ?, Product_SellingPrice = ? where Product_SlNo = ?", [$product->purchaseRate, $product->salesRate, $product->productId]);
 
-                $this->db->query("
-                    update tbl_product set 
-                    Product_Purchase_Rate = ?, 
-                    Product_SellingPrice = ? 
-                    where Product_SlNo = ?
-                ", [
-                    $product->purchaseRate,
-                    $product->salesRate,
-                    $product->productId
-                ]);
+                if($product->newproduct == 'true'){
+                    $this->db->query("
+                        update tbl_product set 
+                        Product_Purchase_Rate = ?, 
+                        Product_SellingPrice = ? 
+                        where Product_SlNo = ?
+                    ", [
+                        $product->purchaseRate,
+                        $product->salesRate,
+                        $product->productId
+                    ]);
+                }
             }
 
             $res = ['success' => true, 'message' => 'Purchase Success', 'purchaseId' => $purchaseId];
@@ -659,6 +673,8 @@ class Purchase extends CI_Controller
                     'PurchaseDetails_Rate'          => $product->purchaseRate,
                     'PurchaseDetails_TotalAmount'   => $product->total,
                     'isFree'                        => $product->isFree,
+                    'imei'                          => $product->imei,
+                    'newproduct'                    => $product->newproduct,
                     'Status'                        => 'a',
                     'UpdateBy'                      => $this->session->userdata("FullName"),
                     'UpdateTime'                    => date('Y-m-d H:i:s'),
@@ -669,12 +685,20 @@ class Purchase extends CI_Controller
 
                 // $previousStock = $this->mt->productStock($product->productId);
 
-                $inventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?", [$product->productId, $this->session->userdata('BRANCHid')])->num_rows();
+                $imei_cluse = '';
+                if($product->imei != null){
+                    $imei_cluse = " and imei = '$product->imei'";
+                }else{
+                    $imei_cluse = " and imei  IS  NULL";
+                }
+
+                $inventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?". $imei_cluse, [$product->productId, $this->session->userdata('BRANCHid')])->num_rows();
                 if ($inventoryCount == 0) {
                     $inventory = array(
                         'product_id' => $product->productId,
                         'purchase_quantity' => $product->quantity,
-                        'branch_id' => $this->session->userdata('BRANCHid')
+                        'branch_id' => $this->session->userdata('BRANCHid'),
+                        'imei' => $product->imei
                     );
 
                     $this->db->insert('tbl_currentinventory', $inventory);
@@ -684,19 +708,21 @@ class Purchase extends CI_Controller
                         set purchase_quantity = purchase_quantity + ? 
                         where product_id = ?
                         and branch_id = ?
-                    ", [$product->quantity, $product->productId, $this->session->userdata('BRANCHid')]);
+                    ".  $imei_cluse, [$product->quantity, $product->productId, $this->session->userdata('BRANCHid')]);
                 }
 
-                $this->db->query("
-                    update tbl_product set 
-                    Product_Purchase_Rate = ?, 
-                    Product_SellingPrice = ? 
-                    where Product_SlNo = ?
-                ", [
-                    $product->purchaseRate,
-                    $product->salesRate,
-                    $product->productId
-                ]);
+                if($product->newproduct == 'true'){
+                    $this->db->query("
+                        update tbl_product set 
+                        Product_Purchase_Rate = ?, 
+                        Product_SellingPrice = ? 
+                        where Product_SlNo = ?
+                    ", [
+                        $product->purchaseRate,
+                        $product->salesRate,
+                        $product->productId
+                    ]);
+                }
             }
 
             $res = ['success' => true, 'message' => 'Purchase Success', 'purchaseId' => $purchaseId];

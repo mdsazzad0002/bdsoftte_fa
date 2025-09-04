@@ -213,6 +213,18 @@ class Products extends CI_Controller
 
         $clauses = "";
         $limit = "";
+        if(isset($data->imei) && $data->imei){
+          
+            $purchase_inof = null;;
+            $items_inventory = $this->db->query("select * from tbl_currentinventory where imei = ? and branch_id = ?",[ $data->name, $this->session->userdata("BRANCHid")])->row();
+            if($items_inventory){
+                $purchase_inof = $this->db->query("select * from tbl_purchasedetails where Product_IDNo  = ? and status = 'a' and PurchaseDetails_branchID = ? and imei = ?", [$items_inventory->product_id, $this->session->userdata("BRANCHid"), $items_inventory->imei])->row();
+                $data->name = $items_inventory->product_id;
+            }else{
+                echo json_encode([]);
+                exit();
+            }
+        }
 
         if (isset($data->categoryId) && $data->categoryId != '') {
             $clauses .= " and p.ProductCategory_ID = '$data->categoryId'";
@@ -225,9 +237,11 @@ class Products extends CI_Controller
         if (isset($data->forSearch) && $data->forSearch != '') {
             $limit .= "limit 20";
         }
-        if (isset($data->name) && $data->name != '') {
+        if (isset($data->name) && $data->name != '' && !isset($data->imei) && !isset($data->isService)) {
             $clauses .= " and p.Product_Code like '$data->name%'";
             $clauses .= " or p.Product_Name like '$data->name%'";
+        }else{
+            $clauses .= " and p.Product_SlNo like '$data->name%'";
         }
 
         $products = $this->db->query("
@@ -246,13 +260,22 @@ class Products extends CI_Controller
                                 order by p.Product_SlNo desc
                                 $limit")->result();
 
+
+                                if(isset($data->imei) && $data->imei && $purchase_inof){
+                                    if($products[0]->Product_Purchase_Rate == null || $products[0]->Product_Purchase_Rate == 0){
+                                        $products[0]->Product_Purchase_Rate = $purchase_inof->PurchaseDetails_Rate;
+                                        $products[0]->newproduct = $purchase_inof->newproduct;
+
+                                    }
+                                }
+
         echo json_encode($products);
     }
 
     public function getProductStock()
     {
         $inputs = json_decode($this->input->raw_input_stream);
-        $stock = $this->mt->productStock($inputs->productId, $inputs->isPackage);
+        $stock = $this->mt->productStock($inputs->productId, $inputs->imei);
         echo $stock;
     }
 

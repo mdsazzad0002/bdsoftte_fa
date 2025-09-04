@@ -39,14 +39,9 @@ class Sales extends CI_Controller
         try {
             $this->db->trans_begin();
             $data = json_decode($this->input->raw_input_stream);
-            // echo json_encode($data);
-            // exit;
+
             foreach ($data->cart as $key => $item) {
-                if($item->type == 'package'){
-                    $curentstock = $this->mt->productStock($item->productId, true);
-                }else{
-                    $curentstock = $this->mt->productStock($item->productId);
-                }
+                $curentstock = $this->mt->productStock($item->productId);
                 if ($item->quantity > $curentstock) {
                     $productName = $item->name . '-' . $item->productCode;
                     echo json_encode(['success' => false, 'message' => "Stock unavailable. Please check: {$productName}"]);
@@ -136,74 +131,39 @@ class Sales extends CI_Controller
             $salesId = $this->db->insert_id();
 
             foreach ($data->cart as $cartProduct) {
-                if($cartProduct->type == 'package'){
-                    $package = $this->db->query("select * from tbl_combomaster 
-                                                left join tbl_combom_details on tbl_combomaster.ComboId = tbl_combom_details.id
-                                                left join tbl_product on tbl_product.Product_SlNo = tbl_combom_details.product_id
-                                                where combo_master_id = ?", $cartProduct->productId)->result();
+                $saleDetails = array(
+                    'SaleMaster_IDNo'           => $salesId,
+                    'Product_IDNo'              => $cartProduct->productId,
+                    'SaleDetails_TotalQuantity' => $cartProduct->quantity,
+                    'Purchase_Rate'             => $cartProduct->purchaseRate,
+                    'SaleDetails_Rate'          => $cartProduct->salesRate,
+                    'SaleDetails_Tax'           => $cartProduct->vat,
+                    'SaleDetails_TotalAmount'   => $cartProduct->total,
+                    'isFree'                    => $cartProduct->isFree,
+                    'Status'                    => 'a',
+                     'imei'                      => $cartProduct->imei,
+                    'newproduct'                => $cartProduct->newproduct,
+                    'AddBy'                     => $this->session->userdata("FullName"),
+                    'AddTime'                   => date('Y-m-d H:i:s'),
+                    'SaleDetails_BranchId'      => $this->session->userdata('BRANCHid')
+                );
 
-                    foreach ($package as $key => $value) {
+                $this->db->insert('tbl_saledetails', $saleDetails);
 
-
-                            
-                        $this->db->query("
-                                    update tbl_currentinventory 
-                                    set sales_quantity = sales_quantity + ? 
-                                    where product_id = ?
-                                    and branch_id = ?
-                                ", [$cartProduct->quantity * $value->qty, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
-
-
-                    }
-
-                    // update stock of package
-                    $this->db->query("update tbl_combomaster set stockQty = stockQty - ? where ComboId = ?", [$cartProduct->quantity, $cartProduct->productId]);
-
-
-                    $saleDetails = array(
-                        'SaleMaster_IDNo'           => $salesId,
-                        'Product_IDNo'              => $cartProduct->productId,
-                        'SaleDetails_TotalQuantity' => $cartProduct->quantity,
-                        'Purchase_Rate'             => $cartProduct->purchaseRate,
-                        'SaleDetails_Rate'          => $cartProduct->salesRate,
-                        'SaleDetails_Tax'           => $cartProduct->vat,
-                        'SaleDetails_TotalAmount'   => $cartProduct->total,
-                        'isFree'                    => $cartProduct->isFree,
-                        'Status'                    => 'a',
-                        'AddBy'                     => $this->session->userdata("FullName"),
-                        'AddTime'                   => date('Y-m-d H:i:s'),
-                        'SaleDetails_BranchId'      => $this->session->userdata('BRANCHid'),
-                        'is_package'                => 1
-                    );
-                      $this->db->insert('tbl_saledetails', $saleDetails);
-
+                $imei_cluse = '';
+                if($cartProduct->imei != null){
+                    $imei_cluse = " and imei = '$cartProduct->imei'";
                 }else{
-                    $saleDetails = array(
-                        'SaleMaster_IDNo'           => $salesId,
-                        'Product_IDNo'              => $cartProduct->productId,
-                        'SaleDetails_TotalQuantity' => $cartProduct->quantity,
-                        'Purchase_Rate'             => $cartProduct->purchaseRate,
-                        'SaleDetails_Rate'          => $cartProduct->salesRate,
-                        'SaleDetails_Tax'           => $cartProduct->vat,
-                        'SaleDetails_TotalAmount'   => $cartProduct->total,
-                        'isFree'                    => $cartProduct->isFree,
-                        'Status'                    => 'a',
-                        'AddBy'                     => $this->session->userdata("FullName"),
-                        'AddTime'                   => date('Y-m-d H:i:s'),
-                        'SaleDetails_BranchId'      => $this->session->userdata('BRANCHid')
-                    );
-    
-                    $this->db->insert('tbl_saledetails', $saleDetails);
-    
-                    //update stock
-                    $this->db->query("
-                        update tbl_currentinventory 
-                        set sales_quantity = sales_quantity + ? 
-                        where product_id = ?
-                        and branch_id = ?
-                    ", [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
-                    
+                    $imei_cluse = " and imei  IS  NULL";
                 }
+
+                //update stock
+                $this->db->query("
+                    update tbl_currentinventory 
+                    set sales_quantity = sales_quantity + ? 
+                    where product_id = ?
+                    and branch_id = ?
+                ".$imei_cluse, [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
             }
 
             if (count($data->banks) > 0) {
@@ -417,62 +377,22 @@ class Sales extends CI_Controller
 
         if (isset($data->salesId) && $data->salesId != 0 && $data->salesId != '') {
             $clauses .= " and SaleMaster_SlNo = '$data->salesId'";
-            // $saleDetails = $this->db->query("
-            //     select 
-            //         sd.*,
-            //         p.Product_Code,
-            //         p.Product_Name,
-            //         pc.ProductCategory_Name,
-            //         u.Unit_Name,
-            //         ifnull(ed.exchange_id, 'false') as is_exchange
-            //     from tbl_saledetails sd
-                
-            //     join tbl_product p on p.Product_SlNo = sd.Product_IDNo
-            //     join tbl_productcategory pc on pc.ProductCategory_SlNo = p.ProductCategory_ID
-
-            //     join tbl_unit u on u.Unit_SlNo = p.Unit_ID
-            //     left join tbl_exchange_detail ed on ed.sale_detail_id = sd.SaleDetails_SlNo
-            //     where sd.SaleMaster_IDNo = ?
-            //     order by sd.SaleDetails_SlNo desc
-            // ", $data->salesId)->result();
             $saleDetails = $this->db->query("
-                SELECT 
+                select 
                     sd.*,
                     p.Product_Code,
-                    ifnull(p.Product_Name, cm.packageName) as Product_Name, 
+                    p.Product_Name,
                     pc.ProductCategory_Name,
                     u.Unit_Name,
-                    
-                    IFNULL(ed.exchange_id, 'false') AS is_exchange
-                FROM tbl_saledetails sd
-                
-                -- Join product if not package
-                LEFT JOIN tbl_product p 
-                    ON p.Product_SlNo = sd.Product_IDNo
-                    AND sd.is_package = 0
-
-                -- Join product category if not package
-                LEFT JOIN tbl_productcategory pc 
-                    ON pc.ProductCategory_SlNo = p.ProductCategory_ID
-                    AND sd.is_package = 0
-
-                -- Join combo if package
-                LEFT JOIN tbl_combomaster cm 
-                    ON cm.ComboId = sd.Product_IDNo
-                    AND sd.is_package = 1
-
-                -- Join unit only if not package
-                LEFT JOIN tbl_unit u 
-                    ON u.Unit_SlNo = p.Unit_ID
-                    AND sd.is_package = 0
-
-                LEFT JOIN tbl_exchange_detail ed 
-                    ON ed.sale_detail_id = sd.SaleDetails_SlNo
-
-                WHERE sd.SaleMaster_IDNo = ?
-                ORDER BY sd.SaleDetails_SlNo DESC
+                    ifnull(ed.exchange_id, 'false') as is_exchange
+                from tbl_saledetails sd
+                join tbl_product p on p.Product_SlNo = sd.Product_IDNo
+                join tbl_productcategory pc on pc.ProductCategory_SlNo = p.ProductCategory_ID
+                join tbl_unit u on u.Unit_SlNo = p.Unit_ID
+                left join tbl_exchange_detail ed on ed.sale_detail_id = sd.SaleDetails_SlNo
+                where sd.SaleMaster_IDNo = ?
+                order by sd.SaleDetails_SlNo desc
             ", $data->salesId)->result();
-
 
             $res['saleDetails'] = $saleDetails;
 
@@ -633,7 +553,10 @@ class Sales extends CI_Controller
                     'SaleDetails_Tax'           => $cartProduct->vat,
                     'SaleDetails_TotalAmount'   => $cartProduct->total,
                     'isFree'                    => $cartProduct->isFree,
+                    'imei'                      => $cartProduct->imei,
+                    'newproduct'                => $cartProduct->newproduct,
                     'Status'                    => 'a',
+                    
                     'AddBy'                     => $this->session->userdata("FullName"),
                     'AddTime'                   => date('Y-m-d H:i:s'),
                     'SaleDetails_BranchId'      => $this->session->userdata("BRANCHid")
@@ -641,12 +564,19 @@ class Sales extends CI_Controller
 
                 $this->db->insert('tbl_saledetails', $saleDetails);
 
+                $imei_cluse = '';
+                if($cartProduct->imei != null){
+                    $imei_cluse = " and imei = '$cartProduct->imei'";
+                }else{
+                    $imei_cluse = " and imei  IS  NULL";
+                }
+
                 $this->db->query("
                     update tbl_currentinventory 
                     set sales_quantity = sales_quantity + ? 
                     where product_id = ?
                     and branch_id = ?
-                ", [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
+                ". $imei_cluse, [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
             }
 
             //old bank list delete

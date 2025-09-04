@@ -194,6 +194,15 @@
 									</div>
 								</div>
 							</div>
+							<div class="form-group">
+								<label class="col-xs-3 control-label no-padding-right">Product IMEI</label>
+								<div class="col-xs-9" style="display: flex;align-items:center;margin-bottom:5px;">
+									<div style="width: 100%;">
+										<input  placeholder="IMEI barcode here" ref="barcode" v-model="selectedProduct.imei" type="text"  id="imeiProductbarcode"  class="form-control" @change="barcodeIMEI($event)" />
+									</div>
+									
+								</div>
+							</div>
 
 							<div class="form-group">
 								<label class="col-xs-3 control-label no-padding-right"> Sale Rate </label>
@@ -245,7 +254,10 @@
 							<th style="width:10%;color:#000;">Sl</th>
 							<th style="width:25%;color:#000;">Description</th>
 							<th style="width:15%;color:#000;">Category</th>
+							<th style="width:15%;color:#000;">Imei</th>
+							<th style="width:10%;color:#000;">Condition</th>
 							<th style="width:7%;color:#000;">Qty</th>
+							<th style="width:8%;color:#000;">Purchase Rate</th>
 							<th style="width:8%;color:#000;">Rate</th>
 							<th style="width:15%;color:#000;">Total</th>
 							<th style="width:10%;color:#000;">Action</th>
@@ -256,8 +268,11 @@
 							<td>{{ sl + 1 }}</td>
 							<td>{{ product.name }} - {{ product.productCode }}</td>
 							<td>{{ product.categoryName }}</td>
+							<td>{{ product.imei }}</td>
+							<td>{{ product.newproduct == 'true' ? 'New' : 'Old' }}</td>
 							<td>{{ product.quantity }}</td>
-							<td>{{ product.salesRate }}</td>
+							<td>{{ product.purchaseRate }}</td>
+							<td><input type="number" step="0.01" v-model="product.salesRate" v-on:input="change_inline_amount(sl);" ></td>
 							<td>{{ product.total }}</td>
 							<td><a href="" v-on:click.prevent="removeFromCart(sl)"><i class="fa fa-trash"></i></a></td>
 						</tr>
@@ -577,6 +592,8 @@
 					vat: 0,
 					total: 0,
 					warranty: '',
+					imei: '',
+					newproduct: false
 				},
 				productPurchaseRate: '',
 				productStockText: '',
@@ -593,7 +610,6 @@
 			await this.getBranches();
 			await this.getCustomers();
 			this.getProducts();
-			
 
 			if (this.sales.salesId != 0) {
 				await this.getSales();
@@ -642,7 +658,12 @@
 					return
 				}
 				this.clearProduct();
-				
+				this.getProducts();
+			},
+			change_inline_amount(sl) {
+				// console.log(this.cart[sl]);
+				this.cart[sl].total = this.cart[sl].quantity * this.cart[sl].salesRate;
+				this.calculateTotal();
 			},
 
 			getEmployees() {
@@ -777,27 +798,6 @@
 					} else {
 						this.products = res.data;
 					}
-					this.getPackages();
-				})
-			},
-			getPackages(data1 = null) {
-				let data = {
-					name: data1 == null ? '' : data1.name
-				}
-				axios.post('/get_packages',data).then(res => {
-					let data = res.data.map(item => {
-						
-							item.display_text = 'Package: ' + item.packageName + ' (' + item.comboInvoice + ')';
-							item.Product_SellingPrice = item.total;
-							item.Product_Name = item.packageName;
-							item.Product_Code = item.comboInvoice;
-							item.Product_Purchase_Rate = parseFloat(item.purchase_price).toFixed(2);
-							item.ProductCategory_Name = 'Package';
-							item.type = 'package';
-							return item;
-						
-					})
-					this.products.unshift(...res.data);
 				})
 			},
 			async onSearchProduct(val, loading) {
@@ -811,9 +811,7 @@
 						.then(res => {
 							let r = res.data;
 							this.products = r.filter(item => item.status == 'a');
-							this.getPackages({name: val});
 							loading(false)
-
 						})
 				} else {
 					loading(false)
@@ -842,7 +840,10 @@
 				this.getProducts();
 			},
 
-			async productOnChange() {
+			async productOnChange(imei = '') {
+				if(typeof(imei) == 'object') {
+					imei = '';
+				}
 				if (this.selectedProduct == null) {
 					this.selectedProduct = {
 						Product_SlNo: '',
@@ -861,10 +862,11 @@
 					if (this.isFree == 'yes') {
 						this.selectedProduct.Product_SellingPrice = 0;
 					}
+					
 					this.productStock = await axios.post('/get_product_stock', {
-						productId: this.selectedProduct.Product_SlNo ? this.selectedProduct.Product_SlNo : this.selectedProduct.ComboId,
-						isPackage: this.selectedProduct.ComboId ? true : false
-
+						productId: this.selectedProduct.Product_SlNo,
+						imei: imei
+						
 					}).then(res => {
 						return res.data;
 					})
@@ -880,11 +882,19 @@
 			toggleProductPurchaseRate() {
 				this.$refs.productPurchaseRate.type = this.$refs.productPurchaseRate.type == 'text' ? 'password' : 'text';
 			},
-			async barcodeProduct(event) {
+			async barcodeIMEI(event) {
+				if(event.target.value != ''){
+					await this.barcodeProduct(event, true);
+				}
+				
+			},
+			async barcodeProduct(event, imei = false) {
+				let name_code = event.target.value;
 				await axios.post('/get_products', {
 					isService: this.sales.isService,
 					categoryId: this.selectedCategory == null ? "" : this.selectedCategory.ProductCategory_SlNo,
-					name: event.target.value,
+					name: name_code,
+					imei: imei
 				}).then(async res => {
 					if (this.sales.salesType == 'wholesale') {
 						this.products = res.data;
@@ -900,7 +910,13 @@
 						this.selectedProduct = prod;
 						this.selectedProduct.quantity = 1;
 						await this.productTotal();
-						await this.productOnChange();
+						
+						if(imei){
+							await this.productOnChange(name_code);
+							this.selectedProduct.imei = name_code;
+						}else{
+							await this.productOnChange();
+						}
 						if (parseFloat(this.productStock) < parseFloat(this.selectedProduct.quantity)) {
 							alert("Stock unavailable");
 							this.barcodeVal = "";
@@ -918,7 +934,14 @@
 						this.selectedProduct = prod;
 						this.selectedProduct.quantity = 1;
 						await this.productTotal();
-						await this.productOnChange();
+						// await this.productOnChange();
+						if(imei){
+							await this.productOnChange(name_code);
+							this.selectedProduct.imei = name_code;
+							// console.log(name_code);
+						}else{
+							await this.productOnChange();
+						}
 						if (parseFloat(this.productStock) < parseFloat(this.selectedProduct.quantity)) {
 							alert("Stock unavailable");
 							this.barcodeVal = "";
@@ -954,25 +977,26 @@
 			},
 			cartCall(event) {
 				if(event.target.value != '' && event.target.value != 0 && event.target.value != null && event.target.value != undefined){
-					// this.addToCart(); 
-					// // $('#product').focus();
-					//   this.$refs.mySelect.$el.querySelector('input').focus();
+					this.addToCart(); 
+					// $('#product').focus();
+					  this.$refs.mySelect.$el.querySelector('input').focus();
 
 				}
 			},
 			addToCart() {
 				let product = {
-					productId: this.selectedProduct.Product_SlNo ? this.selectedProduct.Product_SlNo : this.selectedProduct.ComboId,
+					productId: this.selectedProduct.Product_SlNo,
 					productCode: this.selectedProduct.Product_Code,
 					categoryName: this.selectedProduct.ProductCategory_Name,
 					name: this.selectedProduct.Product_Name,
+					newproduct: this.selectedProduct.newproduct ? 'true' : 'false',
 					salesRate: this.selectedProduct.Product_SellingPrice,
 					vat: this.selectedProduct.vat,
 					quantity: this.selectedProduct.quantity,
 					total: this.selectedProduct.total,
 					purchaseRate: this.selectedProduct.Product_Purchase_Rate,
-					isFree: this.isFree,
-					type: this.selectedProduct.ComboId ? 'package' : 'product'
+					imei: this.selectedProduct.imei,
+					isFree: this.isFree
 				}
 
 				if (product.productId == '' && !this.barcode) {
@@ -1042,11 +1066,11 @@
 				} else {
 					this.discountPercent = (parseFloat(this.sales.discount) / parseFloat(this.sales.subTotal) * 100).toFixed(2);
 				}
-				this.sales.total = ((parseFloat(this.sales.subTotal) + parseFloat(this.sales.vat ) + parseFloat(this.sales.transportCost)) - parseFloat(+this.sales.discount + +this.sales.pointAmount)).toFixed(2);
-		// console.log('total paid',this.sales);
+				this.sales.total = ((parseFloat(this.sales.subTotal) + parseFloat(this.sales.vat) + parseFloat(this.sales.transportCost)) - parseFloat(+this.sales.discount + +this.sales.pointAmount)).toFixed(2);
+
 				if (event.target.id == 'cashPaid' || this.bankCart.length > 0) {
 					this.sales.paid = parseFloat(parseFloat(this.sales.cashPaid) + parseFloat(this.sales.bankPaid)).toFixed(2);
-					// console.log('total paid', this.sales.paid, this.sales.cashPaid, this.sales.bankPaid, this.sales.total);
+					console.log('total paid', this.sales.paid, this.sales.cashPaid, this.sales.bankPaid);
 					if(this.sales.paid == this.sales.total){
 						this.sales.returnAmount = 0;
 						this.sales.due = 0;

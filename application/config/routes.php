@@ -179,21 +179,6 @@ $route['sale_return_invoice/(:any)'] = 'Administrator/Sales/saleReturnInvoice/$1
 $route['sale_return_details'] = 'Administrator/Sales/saleReturnDetails';
 $route['check_sale_return/(:any)'] = 'Administrator/Sales/checkSaleReturn/$1';
 
-// Combo Package
-$route['combo_package'] = 'Administrator/Combo_package';
-$route['combo_package/(:any)'] = 'Administrator/Combo_package/combo_package/$1';
-$route['add_combo_package'] = 'Administrator/Combo_package/addComboPackage';
-$route['update_combo_package'] = 'Administrator/Combo_package/updateComboPackage';
-$route['delete_combo_package'] = 'Administrator/Combo_package/deleteComboPackage';
-$route['get_combo_packages'] = 'Administrator/Combo_package/getComboPackages';
-$route['combo_package_details'] = 'Administrator/Combo_package/combo_package_details';
-$route['get_combo_packages'] = 'Administrator/Combo_package/getComboPackageDetails';
-$route['update_combo_package_stock'] = 'Administrator/Combo_package/update_combo_package_stock';
-
-$route['get_packages'] = 'Administrator/Combo_package/getPackages';
-
-
-
 $route['sale_invoice_print/(:any)'] = 'Administrator/Sales/saleInvoicePrint/$1';
 $route['craditlimit'] = 'Administrator/Sales/craditlimit/';
 $route['salesrecord'] = 'Administrator/Sales/sales_record';

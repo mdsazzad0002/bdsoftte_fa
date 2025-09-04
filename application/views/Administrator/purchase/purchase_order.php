@@ -157,14 +157,26 @@
 										<input type="text" id="sellingPrice" name="sellingPrice" class="form-control" v-model="selectedProduct.Product_SellingPrice" />
 									</div>
 								</div>
+								<div class="form-group">
+									<label class="col-xs-4 control-label no-padding-right"> IMEI </label>
+									<div class="col-xs-8">
+										<input type="text" placeholder="IMEI"   class="form-control" v-model="selectedProduct.imei" />
+									</div>
+								</div>
+
 
 								<div class="form-group">
-									<label class="col-xs-4 control-label no-padding-right"></label>
-									<label class="col-xs-4 control-label" for="isFree" style="display: flex;align-items:center;cursor:pointer;">
+									<label class="col-xs-12 control-label no-padding-right"></label>
+									<label class="col-xs-12 control-label" for="isFree" style="display: flex;align-items:center;cursor:pointer;">
 										<input type="checkbox" @change="onChangeFreeProduct" style="margin: 0px;width: 16px;height: 16px;cursor:pointer;" id="isFree" :true-value="`yes`" :false-value="`no`" v-model="isFree">
 										<span style="margin: 0;margin-left: 6px;">Is Free Product</span>
 									</label>
-									<div class="col-xs-4">
+									<label class="col-xs-12 control-label no-padding-right"></label>
+									<label class="col-xs-12 control-label" for="isFree" style="display: flex;align-items:center;cursor:pointer;">
+										<input type="checkbox" style="margin: 0px;width: 16px;height: 16px;cursor:pointer;" id="newproduct" :true-value="`true`" :false-value="`false`" v-model="selectedProduct.newproduct">
+										<span style="margin: 0;margin-left: 6px;">Is New Product</span>
+									</label>
+									<div class="col-xs-12">
 										<button type="submit" class="pull-right">Add Cart</button>
 									</div>
 								</div>
@@ -184,6 +196,8 @@
 							<th style="width:4%;color:#000;">SL</th>
 							<th style="width:20%;color:#000;">Product Name</th>
 							<th style="width:13%;color:#000;">Category</th>
+							<th style="width:13%;color:#000;">IMEI</th>
+							<th style="width:13%;color:#000;">Condition</th>
 							<th style="width:8%;color:#000;">Rate</th>
 							<th style="width:5%;color:#000;">Quantity</th>
 							<th style="width:13%;color:#000;">Total</th>
@@ -195,6 +209,8 @@
 							<td>{{ sl + 1}}</td>
 							<td>{{ product.name }}</td>
 							<td>{{ product.categoryName }}</td>
+							<td>{{ product.imei }}</td>
+							<td>{{ product.newproduct == 'true' ? 'New' : 'Old' }}</td>
 							<td>{{ product.purchaseRate }}</td>
 							<td>{{ product.quantity }}</td>
 							<td>{{ product.total }}</td>
@@ -206,12 +222,12 @@
 						</tr>
 
 						<tr style="font-weight: bold;">
-							<td colspan="4">Note</td>
+							<td colspan="5">Note</td>
 							<td colspan="3">Total</td>
 						</tr>
 
 						<tr>
-							<td colspan="4"><textarea style="width: 100%;font-size:13px;" placeholder="Note" v-model="purchase.note"></textarea></td>
+							<td colspan="5"><textarea style="width: 100%;font-size:13px;" placeholder="Note" v-model="purchase.note"></textarea></td>
 							<td colspan="3" style="padding-top: 15px;font-size:18px;">{{ purchase.total }}</td>
 						</tr>
 					</tbody>
@@ -382,7 +398,8 @@
 					paid: 0,
 					due: 0,
 					previousDue: 0,
-					note: ''
+					note: '',
+					
 				},
 				vatPercent: 0,
 				branches: [],
@@ -412,7 +429,8 @@
 					quantity: '',
 					Product_Purchase_Rate: '',
 					Product_SellingPrice: 0,
-					total: ''
+					total: '',
+					newproduct: false
 				},
 				isFree: 'no',
 				cart: [],
@@ -547,7 +565,7 @@
 				this.selectedProduct.total = this.selectedProduct.quantity * this.selectedProduct.Product_Purchase_Rate;
 			},
 			addToCart() {
-				let cartInd = this.cart.findIndex(p => (p.productId == this.selectedProduct.Product_SlNo) && (p.isFree == this.isFree));
+				let cartInd = this.cart.findIndex(p => (p.productId == this.selectedProduct.Product_SlNo) && (p.isFree == this.isFree) && (p.imei == this.selectedProduct.imei));
 				if (cartInd > -1) {
 					alert('Product exists in cart');
 					return;
@@ -562,6 +580,7 @@
 					salesRate: this.selectedProduct.Product_SellingPrice,
 					quantity: this.selectedProduct.quantity,
 					total: this.selectedProduct.total,
+					imei : this.selectedProduct.imei,
 					isFree: this.isFree
 				}
 
@@ -708,6 +727,7 @@
 							categoryName: product.ProductCategory_Name,
 							purchaseRate: product.PurchaseDetails_Rate,
 							salesRate: product.Product_SellingPrice,
+							imei: product.imei,
 							quantity: product.PurchaseDetails_TotalQuantity,
 							total: product.PurchaseDetails_TotalAmount,
 							isFree: product.isFree

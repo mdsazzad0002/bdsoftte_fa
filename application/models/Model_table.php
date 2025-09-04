@@ -729,17 +729,15 @@ class Model_Table extends CI_Model
         return $dueResult;
     }
 
-    public function productStock($productId, $package = false)
+    public function productStock($productId, $imei = '')
     {
-        if($package){
-            $product_stock = $this->db->query("select * from tbl_combomaster where ComboId  = ? and branch_id = ?", [$productId, $this->session->userdata("BRANCHid")]);
-            if($product_stock->num_rows() == 0){
-                return 0;
-            }else{
-                return $product_stock->row()->stockQty;
-            }
+        $cluse = '';
+        if($imei != '') {
+            $cluse = " and imei = '$imei'";
+        }else{
+            $cluse = " and imei  IS  NULL";
         }
-        $stockQuery = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?", [$productId, $this->session->userdata("BRANCHid")]);
+        $stockQuery = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ? ". $cluse, [$productId, $this->session->userdata("BRANCHid"),]);
         $stockCount = $stockQuery->num_rows();
         $stock = 0;
         if ($stockCount != 0) {

@@ -600,29 +600,30 @@ function format_bangladesh_mobile($number) {
 
 
 function send_sms($number, $sms) {
-    $url = "https://sms.mram.com.bd/smsapi";
+    // $url = "https://sms.mram.com.bd/smsapi";
     
-      if(format_bangladesh_mobile($number)){
-        $data = [
-            "api_key"   => "C3002175683bfe1648f056.92907807",
-            "type"      => "unicode", // Make sure the API supports and accepts this type
-            "contacts"  => $number,
-            "senderid"  => "46063",
-            "msg"       => $sms,
-        ];
+    //   if(format_bangladesh_mobile($number)){
+    //     $data = [
+    //         "api_key"   => "C3002175683bfe1648f056.92907807",
+    //         "type"      => "unicode", // Make sure the API supports and accepts this type
+    //         "contacts"  => $number,
+    //         "senderid"  => "46063",
+    //         "msg"       => $sms,
+    //     ];
     
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    //     $ch = curl_init();
+    //     curl_setopt($ch, CURLOPT_URL, $url);
+    //     curl_setopt($ch, CURLOPT_POST, 1);
+    //     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    //     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         
-        $response = curl_exec($ch);
-        curl_close($ch);
-        return $response;
+    //     $response = curl_exec($ch);
+    //     curl_close($ch);
+    //     return $response;
           
-      }
+    //   }
+    return true;
       return false;
 
 }

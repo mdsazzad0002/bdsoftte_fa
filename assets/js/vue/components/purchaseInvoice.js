@@ -41,6 +41,7 @@ const purchaseInvoice = Vue.component('purchase-invoice', {
                                     <td>Sl.</td>
                                     <td>Description</td>
                                     <td>Quantity</td>
+                                    <td>IMEI</td>
                                     <td>Unit Price</td>
                                     <td align="right">Total</td>
                                 </tr>
@@ -56,6 +57,7 @@ const purchaseInvoice = Vue.component('purchase-invoice', {
                                          </span>
                                     </td>
                                     <td>{{ product.PurchaseDetails_TotalQuantity }} {{ product.Unit_Name }}</td>
+                                    <td >{{ product.imei }}</td>
                                     <td align="right">{{ product.PurchaseDetails_Rate }}</td>
                                     <td align="right">{{ product.PurchaseDetails_TotalAmount }}</td>
                                 </tr>
