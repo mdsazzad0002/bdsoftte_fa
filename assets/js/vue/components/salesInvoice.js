@@ -65,9 +65,8 @@ const salesInvoice = Vue.component('sales-invoice', {
                                 <tr>
                                     <td>Sl.</td>
                                     <td>Product Description</td>
-                                    <td>Condition</td>
-                                    <td>IMEI</td>
                                     <td>Quantity</td>
+                                    <td>Serial</td>
                                     <td>Rate</td>
                                     <td>Total</td>
                                 </tr>
@@ -75,7 +74,6 @@ const salesInvoice = Vue.component('sales-invoice', {
                             <tbody>
                                 <tr v-for="(product, sl) in cart">
                                     <td>{{ sl + 1 }}</td>
-                                  
                                     <td style="text-align:left;" :style="{lineHeight: product.isFree == 'yes' ? '0.9' : ''}">
                                         {{ product.Product_Name }}
                                          <span v-if="product.isFree == 'yes'">
@@ -83,9 +81,8 @@ const salesInvoice = Vue.component('sales-invoice', {
                                             <i style="font-weight: 700;font-size: 10px;">Free</i>
                                          </span>
                                     </td>
-                                    <td>{{ product.newproduct == 'true' ? 'New' : 'Old' }}</td>
-                                    <td>{{ product.imei }}</td>
                                     <td>{{ product.SaleDetails_TotalQuantity }} {{ product.Unit_Name }}</td>
+                                    <td>{{ product.serial }}</td>
                                     <td>{{ product.SaleDetails_Rate }}</td>
                                     <td align="right">{{ product.SaleDetails_TotalAmount }}</td>
                                 </tr>

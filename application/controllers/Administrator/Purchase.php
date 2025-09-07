@@ -47,13 +47,20 @@ class Purchase extends CI_Controller
                     p.ProductCategory_ID,
                     p.Product_SellingPrice,
                     pc.ProductCategory_Name,
-                    u.Unit_Name
+                    pd.PurchaseDetails_SlNo,
+                    u.Unit_Name,
+                    (
+                        select group_concat(s.serial_no  separator ',')
+                        from tbl_serial s
+                        where s.purchase_details_id = pd.PurchaseDetails_SlNo
+                    ) as serial_numbers
                 from tbl_purchasedetails pd 
                 join tbl_product p on p.Product_SlNo = pd.Product_IDNo
                 join tbl_productcategory pc on pc.ProductCategory_SlNo = p.ProductCategory_ID
                 join tbl_unit u on u.Unit_SlNo = p.Unit_ID
                 where pd.PurchaseMaster_IDNo = '$data->purchaseId'
             ")->result();
+
         }
         $purchases = $this->db->query("
             select
@@ -67,6 +74,7 @@ class Purchase extends CI_Controller
             s.Supplier_Email
             from tbl_purchasemaster pm
             left join tbl_supplier s on s.Supplier_SlNo = pm.Supplier_SlNo
+            
             where pm.PurchaseMaster_BranchID = '$branchId' 
             and pm.status = 'a'
             $purchaseIdClause $clauses
@@ -85,7 +93,13 @@ class Purchase extends CI_Controller
                 pd.*,
                 pd.PurchaseDetails_Rate as return_rate,
                 p.Product_Name,
+                p.is_serial,
                 pc.ProductCategory_Name,
+                (
+                    select group_concat(s.serial_no  separator ',')
+                    from tbl_serial s
+                    where s.purchase_details_id = pd.PurchaseDetails_SlNo
+                ) as serial_numbers,
                 (
                     select ifnull(sum(prd.PurchaseReturnDetails_ReturnQuantity), 0) 
                     from tbl_purchasereturndetails prd
@@ -128,6 +142,7 @@ class Purchase extends CI_Controller
             );
 
             $this->db->insert('tbl_purchasereturn', $purchaseReturn);
+            
             $purchaseReturnId = $this->db->insert_id();
 
             $totalReturnAmount = 0;
@@ -143,9 +158,21 @@ class Purchase extends CI_Controller
                     'PurchaseReturnDetails_brachid' => $this->session->userdata('BRANCHid')
                 );
 
+
                 $this->db->insert('tbl_purchasereturndetails', $returnDetails);
+                $purchase_return_details_id = $this->db->insert_id();
 
                 $totalReturnAmount += $product->return_amount;
+
+                if($product->is_serial == 'yes'){
+                    foreach ($product->return_serials as $serial) {
+                        $this->db->query("
+                            update tbl_serial 
+                            set purchase_return_details_id = ?, is_return = 'yes' 
+                            where serial_no = ?
+                        ", [$purchase_return_details_id,$serial]);
+                    }
+                }
 
                 $this->db->query("
                     update tbl_currentinventory 
@@ -454,6 +481,15 @@ class Purchase extends CI_Controller
                 $invoice = $this->mt->generatePurchaseInvoice();
             }
 
+            foreach ($data->cartProducts as $key => $carts) {
+                foreach (explode(',', $carts->serial) as $serial) {
+                    if($this->mt->serialStock($carts->productId, $serial) == 'yes'){
+                        echo json_encode(['success' => false, 'message' => 'Serial $serial Already In Stock']);
+                        return;
+                    }   
+                }
+            }
+
             $supplierId = $data->purchase->supplierId;
             if (isset($data->supplier)) {
                 $supplier = (array)$data->supplier;
@@ -488,7 +524,6 @@ class Purchase extends CI_Controller
                 'PurchaseMaster_DueAmount' => $data->purchase->due,
                 'previous_due' => $data->purchase->previousDue,
                 'PurchaseMaster_Description' => $data->purchase->note,
-                
                 'status' => 'a',
                 'AddBy' => $this->session->userdata("FullName"),
                 'AddTime' => date('Y-m-d H:i:s'),
@@ -518,8 +553,6 @@ class Purchase extends CI_Controller
                     'PurchaseDetails_TotalAmount'   => $product->total,
                     'isFree'                        => $product->isFree,
                     'Status'                        => 'a',
-                    'imei'                          => $product->imei,
-                    'newproduct'                    => $product->newproduct,
                     'AddBy'                         => $this->session->userdata("FullName"),
                     'AddTime'                       => date('Y-m-d H:i:s'),
                     'PurchaseDetails_branchID'      => $this->session->userdata('BRANCHid')
@@ -527,21 +560,35 @@ class Purchase extends CI_Controller
 
                 $this->db->insert('tbl_purchasedetails', $purchaseDetails);
 
-                $imei_cluse = '';
-                if($product->imei != null){
-                    $imei_cluse = " and imei = '$product->imei'";
-                }else{
-                    $imei_cluse = " and imei  IS  NULL";
+                // update stock
+                $purchase_details_id = $this->db->insert_id();
+                if($product->is_serial == 'yes'){
+                    foreach (explode(',', $product->serial) as $serial) {
+                        $serial = trim($serial);
+                        $check_exists = $this->db->query("select * from tbl_serial where serial_no = ? and product_id = ?", [$serial, $product->productId])->row();
+                        if (empty($check_exists)) {
+                            $serial_data = array(
+                                'serial_no' => $serial,
+                                'product_id' => $product->productId,
+                                'purchase_details_id' => $purchase_details_id,
+                                'is_purchase' => 1
+                            );
+                            $this->db->insert('tbl_serial', $serial_data);
+                        }else{
+                            $this->db->query("update tbl_serial set is_purchase = 1 where serial_no = ? and product_id = ?", [$serial, $product->productId]);
+                        }
+                    }
                 }
+                // update stock
 
 
-                $inventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?" . $imei_cluse, [$product->productId, $this->session->userdata('BRANCHid')])->num_rows();
+
+                $inventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?", [$product->productId, $this->session->userdata('BRANCHid')])->num_rows();
                 if ($inventoryCount == 0) {
                     $inventory = array(
                         'product_id' => $product->productId,
                         'purchase_quantity' => $product->quantity,
-                        'branch_id' => $this->session->userdata('BRANCHid'),
-                        'imei' => $product->imei
+                        'branch_id' => $this->session->userdata('BRANCHid')
                     );
 
                     $this->db->insert('tbl_currentinventory', $inventory);
@@ -551,24 +598,28 @@ class Purchase extends CI_Controller
                         set purchase_quantity = purchase_quantity + ? 
                         where product_id = ? 
                         and branch_id = ?
-                    " . $imei_cluse, [$product->quantity, $product->productId, $this->session->userdata('BRANCHid')]);
+                    ", [$product->quantity, $product->productId, $this->session->userdata('BRANCHid')]);
                 }
+
+
+
 
                 // $this->db->query("update tbl_product set Product_Purchase_Rate = ?, Product_SellingPrice = ? where Product_SlNo = ?", [$product->purchaseRate, $product->salesRate, $product->productId]);
 
-                if($product->newproduct == 'true'){
-                    $this->db->query("
-                        update tbl_product set 
-                        Product_Purchase_Rate = ?, 
-                        Product_SellingPrice = ? 
-                        where Product_SlNo = ?
-                    ", [
-                        $product->purchaseRate,
-                        $product->salesRate,
-                        $product->productId
-                    ]);
-                }
+                
+                $this->db->query("
+                    update tbl_product set 
+                    Product_Purchase_Rate = ?, 
+                    Product_SellingPrice = ? 
+                    where Product_SlNo = ?
+                ", [
+                    $product->purchaseRate,
+                    $product->salesRate,
+                    $product->productId
+                ]);
             }
+
+            
 
             $res = ['success' => true, 'message' => 'Purchase Success', 'purchaseId' => $purchaseId];
         } catch (Exception $ex) {
@@ -653,6 +704,11 @@ class Purchase extends CI_Controller
                     and branch_id = ?
                 ", [$product->PurchaseDetails_TotalQuantity, $product->Product_IDNo, $this->session->userdata('BRANCHid')]);
 
+
+                $this->db->query("update tbl_serial set purchase_details_id = null, is_purchase = 'no' where product_id = ? and purchase_details_id = ?", [$product->Product_IDNo, 
+                    $product->PurchaseDetails_SlNo]);
+
+
                 // $this->db->query("
                 //     update tbl_product set 
                 //     Product_Purchase_Rate = (((Product_Purchase_Rate * ?) - ?) / ?)
@@ -673,8 +729,6 @@ class Purchase extends CI_Controller
                     'PurchaseDetails_Rate'          => $product->purchaseRate,
                     'PurchaseDetails_TotalAmount'   => $product->total,
                     'isFree'                        => $product->isFree,
-                    'imei'                          => $product->imei,
-                    'newproduct'                    => $product->newproduct,
                     'Status'                        => 'a',
                     'UpdateBy'                      => $this->session->userdata("FullName"),
                     'UpdateTime'                    => date('Y-m-d H:i:s'),
@@ -682,23 +736,40 @@ class Purchase extends CI_Controller
                 );
 
                 $this->db->insert('tbl_purchasedetails', $purchaseDetails);
+               
+               
+               // serial update
+                $purchase_details_id = $this->db->insert_id();
+                foreach (explode(',', $product->serial)  as $serial) {
+                        $this->db->where('product_id', $product->productId)
+                                ->where('serial_no', $serial);
+
+                        $updated = $this->db->update('tbl_serial', [
+                            'purchase_details_id' => $purchase_details_id,
+                            'is_purchase' => 'yes'
+                        ]);
+
+                        if ($this->db->affected_rows() == 0) {
+                            // Not updated -> insert new
+                            $this->db->insert('tbl_serial', [
+                                'product_id' => $product->productId,
+                                'serial_no' => $serial,
+                                'purchase_details_id' => $purchase_details_id,
+                                'is_purchase' => 'yes'
+                            ]);
+                        }
+                    }
+                // end serial update
+
 
                 // $previousStock = $this->mt->productStock($product->productId);
 
-                $imei_cluse = '';
-                if($product->imei != null){
-                    $imei_cluse = " and imei = '$product->imei'";
-                }else{
-                    $imei_cluse = " and imei  IS  NULL";
-                }
-
-                $inventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?". $imei_cluse, [$product->productId, $this->session->userdata('BRANCHid')])->num_rows();
+                $inventoryCount = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?", [$product->productId, $this->session->userdata('BRANCHid')])->num_rows();
                 if ($inventoryCount == 0) {
                     $inventory = array(
                         'product_id' => $product->productId,
                         'purchase_quantity' => $product->quantity,
-                        'branch_id' => $this->session->userdata('BRANCHid'),
-                        'imei' => $product->imei
+                        'branch_id' => $this->session->userdata('BRANCHid')
                     );
 
                     $this->db->insert('tbl_currentinventory', $inventory);
@@ -708,21 +779,19 @@ class Purchase extends CI_Controller
                         set purchase_quantity = purchase_quantity + ? 
                         where product_id = ?
                         and branch_id = ?
-                    ".  $imei_cluse, [$product->quantity, $product->productId, $this->session->userdata('BRANCHid')]);
+                    ", [$product->quantity, $product->productId, $this->session->userdata('BRANCHid')]);
                 }
 
-                if($product->newproduct == 'true'){
-                    $this->db->query("
-                        update tbl_product set 
-                        Product_Purchase_Rate = ?, 
-                        Product_SellingPrice = ? 
-                        where Product_SlNo = ?
-                    ", [
-                        $product->purchaseRate,
-                        $product->salesRate,
-                        $product->productId
-                    ]);
-                }
+                $this->db->query("
+                    update tbl_product set 
+                    Product_Purchase_Rate = ?, 
+                    Product_SellingPrice = ? 
+                    where Product_SlNo = ?
+                ", [
+                    $product->purchaseRate,
+                    $product->salesRate,
+                    $product->productId
+                ]);
             }
 
             $res = ['success' => true, 'message' => 'Purchase Success', 'purchaseId' => $purchaseId];
@@ -1671,7 +1740,10 @@ class Purchase extends CI_Controller
                 select 
                     prd.*,
                     p.Product_Code,
-                    p.Product_Name
+                    p.Product_Name,
+                    (
+                        select group_concat(serial.serial_no separator ', ') from tbl_serial serial where serial.product_id =  p.Product_SlNo and serial.purchase_return_details_id = prd.PurchaseReturnDetails_SlNo
+                    ) as serial
                 from tbl_purchasereturndetails prd
                 join tbl_product p on p.Product_SlNo = prd.PurchaseReturnDetailsProduct_SlNo
                 where prd.PurchaseReturn_SlNo = ?

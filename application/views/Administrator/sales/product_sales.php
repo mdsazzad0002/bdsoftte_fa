@@ -60,6 +60,13 @@
 	.add-button:focus {
 		color: white;
 	}
+	.p-0{
+		padding: 0px;
+	
+	}
+	.w-100{
+		width: 100%;
+	}
 </style>
 
 <div id="sales" class="row">
@@ -75,7 +82,8 @@
 			<div class="form-group">
 				<label class="col-md-1 control-label no-padding-right"> Sales By </label>
 				<div class="col-md-2">
-					<v-select v-bind:options="employees" v-model="selectedEmployee" label="Employee_Name" @input="onChangeEmployee" placeholder="Select Employee"></v-select>
+					<v-select v-bind:options="employees" v-model="selectedEmployee" label="Employee_Name"
+						@input="onChangeEmployee" placeholder="Select Employee"></v-select>
 				</div>
 			</div>
 
@@ -88,7 +96,8 @@
 
 			<div class="form-group">
 				<div class="col-md-3">
-					<input class="form-control" id="salesDate" type="date" v-model="sales.salesDate" v-bind:disabled="userType == 'u' ? true : false" />
+					<input class="form-control" id="salesDate" type="date" v-model="sales.salesDate"
+						v-bind:disabled="userType == 'u' ? true : false" />
 				</div>
 			</div>
 		</div>
@@ -119,10 +128,13 @@
 								<label class="col-xs-4 control-label no-padding-right"> Customer </label>
 								<div class="col-xs-8" style="display: flex;align-items:center;margin-bottom:5px;">
 									<div style="width: 86%;">
-										<v-select v-bind:options="customers" style="margin: 0;" label="display_name" v-model="selectedCustomer" v-on:input="customerOnChange" @search="onSearchCustomer"></v-select>
+										<v-select v-bind:options="customers" style="margin: 0;" label="display_name"
+											v-model="selectedCustomer" v-on:input="customerOnChange"
+											@search="onSearchCustomer"></v-select>
 									</div>
 									<div style="width: 13%;margin-left:2px;">
-										<a href="<?= base_url('customer') ?>" class="add-button" target="_blank" title="Add New Customer"><i class="fa fa-plus" aria-hidden="true"></i></a>
+										<a href="<?= base_url('customer') ?>" class="add-button" target="_blank"
+											title="Add New Customer"><i class="fa fa-plus" aria-hidden="true"></i></a>
 									</div>
 								</div>
 							</div>
@@ -130,39 +142,49 @@
 							<div class="form-group">
 								<label class="col-xs-4 control-label no-padding-right"> Name </label>
 								<div class="col-xs-8">
-									<input type="text" id="customerName" placeholder="Customer Name" class="form-control" v-model="selectedCustomer.Customer_Name" v-bind:disabled="selectedCustomer.Customer_Type == 'G' || selectedCustomer.Customer_Type == 'N' ? false : true" />
+									<input type="text" id="customerName" placeholder="Customer Name"
+										class="form-control" v-model="selectedCustomer.Customer_Name"
+										v-bind:disabled="selectedCustomer.Customer_Type == 'G' || selectedCustomer.Customer_Type == 'N' ? false : true" />
 								</div>
 							</div>
 
 							<div class="form-group">
 								<label class="col-xs-4 control-label no-padding-right"> Mobile No </label>
 								<div class="col-xs-8">
-									<input type="text" id="mobileNo" placeholder="Mobile No" class="form-control" v-model="selectedCustomer.Customer_Mobile" v-bind:disabled="selectedCustomer.Customer_Type == 'G' || selectedCustomer.Customer_Type == 'N' ? false : true" />
+									<input type="text" id="mobileNo" placeholder="Mobile No" class="form-control"
+										v-model="selectedCustomer.Customer_Mobile"
+										v-bind:disabled="selectedCustomer.Customer_Type == 'G' || selectedCustomer.Customer_Type == 'N' ? false : true" />
 								</div>
 							</div>
 
 							<div class="form-group">
 								<label class="col-xs-4 control-label no-padding-right"> Address </label>
 								<div class="col-xs-8">
-									<input type="text" id="address" placeholder="Address" class="form-control" v-model="selectedCustomer.Customer_Address" v-bind:disabled="selectedCustomer.Customer_Type == 'G' || selectedCustomer.Customer_Type == 'N' ? false : true">
+									<input type="text" id="address" placeholder="Address" class="form-control"
+										v-model="selectedCustomer.Customer_Address"
+										v-bind:disabled="selectedCustomer.Customer_Type == 'G' || selectedCustomer.Customer_Type == 'N' ? false : true">
 								</div>
 							</div>
 							<div class="form-group">
 								<label class="col-xs-12 control-label no-padding-right" for="is_member">
-									<input type="checkbox" id="is_member" v-model="selectedCustomer.is_member" :true-value="`yes`" :false-value="`no`">
+									<input type="checkbox" id="is_member" v-model="selectedCustomer.is_member"
+										:true-value="`yes`" :false-value="`no`">
 									Is Member
 								</label>
 
 							</div>
-							<div class="form-group" v-show="selectedCustomer.is_member == 'yes'" style="display: none;" :style="{display: selectedCustomer.is_member == 'yes' ? '' : 'none'}">
+							<div class="form-group" v-show="selectedCustomer.is_member == 'yes'" style="display: none;"
+								:style="{display: selectedCustomer.is_member == 'yes' ? '' : 'none'}">
 								<label class="col-xs-2 control-label no-padding-right"> Point </label>
 								<div class="col-xs-3">
 									<input type="text" class="form-control" v-model="selectedCustomer.point" readonly>
 								</div>
 								<div class="col-xs-7">
-									<div style="display: flex;align-items: center;gap: 8px;" title="১ পয়েন্ট কত টাকায় হবে?">
+									<div style="display: flex;align-items: center;gap: 8px;"
+										title="১ পয়েন্ট কত টাকায় হবে?">
 										<label class="control-label" for="amount">Amount:</label>
-										<input type="number" min="0" step="any" class="form-control" id="amount" v-model="selectedCustomer.amount">
+										<input type="number" min="0" step="any" class="form-control" id="amount"
+											v-model="selectedCustomer.amount">
 									</div>
 								</div>
 							</div>
@@ -173,10 +195,13 @@
 								<label class="col-xs-3 control-label no-padding-right"> Category </label>
 								<div class="col-xs-9" style="display: flex;align-items:center;margin-bottom:5px;">
 									<div style="width: 86%;">
-										<v-select v-bind:options="categories" id="category" style="margin: 0;" v-model="selectedCategory" label="ProductCategory_Name" @input="onChangeCategory" placeholder="Select Category"></v-select>
+										<v-select v-bind:options="categories" id="category" style="margin: 0;"
+											v-model="selectedCategory" label="ProductCategory_Name"
+											@input="onChangeCategory" placeholder="Select Category"></v-select>
 									</div>
 									<div style="width: 13%;margin-left:2px;">
-										<a href="<?= base_url('category') ?>" class="add-button" target="_blank" title="Add New Category"><i class="fa fa-plus" aria-hidden="true"></i></a>
+										<a href="<?= base_url('category') ?>" class="add-button" target="_blank"
+											title="Add New Category"><i class="fa fa-plus" aria-hidden="true"></i></a>
 									</div>
 								</div>
 							</div>
@@ -185,60 +210,101 @@
 								<label class="col-xs-3 control-label no-padding-right"> Product </label>
 								<div class="col-xs-9" style="display: flex;align-items:center;margin-bottom:5px;">
 									<div style="width: 86%;">
-										<v-select v-show="!barcode" v-bind:options="products" ref="mySelect" id="product" style="margin: 0;" v-model="selectedProduct" label="display_text" @input="productOnChange" @search="onSearchProduct"></v-select>
+										<v-select v-show="!barcode" v-bind:options="products" ref="mySelect"
+											id="product" style="margin: 0;" v-model="selectedProduct"
+											label="display_text" @input="productOnChange"
+											@search="onSearchProduct"></v-select>
 
-										<input v-show="barcode" placeholder="barcode here" ref="barcode" v-model="barcodeVal" type="text"  id="Productbarcode"  class="form-control" @change="barcodeProduct($event)" />
+										<input v-show="barcode" placeholder="barcode here" ref="barcode"
+											v-model="barcodeVal" type="text" id="Productbarcode" class="form-control"
+											@change="barcodeProduct($event)" />
 									</div>
 									<div style="width: 13%;margin-left:2px;">
-										<a class="add-button" @click="barcode = !barcode"><i class="fa fa-barcode" aria-hidden="true"></i></a>
+										<a class="add-button" @click="barcode = !barcode"><i class="fa fa-barcode"
+												aria-hidden="true"></i></a>
 									</div>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-xs-3 control-label no-padding-right">Product IMEI</label>
-								<div class="col-xs-9" style="display: flex;align-items:center;margin-bottom:5px;">
-									<div style="width: 100%;">
-										<input  placeholder="IMEI barcode here" ref="barcode" v-model="selectedProduct.imei" type="text"  id="imeiProductbarcode"  class="form-control" @change="barcodeIMEI($event)" />
-									</div>
-									
 								</div>
 							</div>
 
 							<div class="form-group">
 								<label class="col-xs-3 control-label no-padding-right"> Sale Rate </label>
 								<div class="col-xs-4">
-									<input type="number" id="salesRate" placeholder="Rate" step="0.01" class="form-control" v-model="selectedProduct.Product_SellingPrice" v-on:input="productTotal" />
+									<input type="number" id="salesRate" placeholder="Rate" step="0.01"
+										class="form-control" v-model="selectedProduct.Product_SellingPrice"
+										v-on:input="productTotal" />
 								</div>
 								<label class="col-xs-1 control-label no-padding-right"> Qty </label>
 								<div class="col-xs-4">
-									<input type="number" step="0.01" id="quantity" placeholder="Qty" class="form-control" @change="cartCall($event)" ref="quantity" v-model="selectedProduct.quantity" v-on:input="productTotal" autocomplete="off" required />
+									<input type="number" step="0.01" id="quantity" placeholder="Qty"
+										class="form-control" @change="cartCall($event)" ref="quantity"
+										v-model="selectedProduct.quantity" v-on:input="productTotal" autocomplete="off"
+										required />
 								</div>
 							</div>
 							<div class="form-group">
 								<label class="col-xs-3 control-label no-padding-right"> Amount </label>
 								<div class="col-xs-9">
-									<input type="text" id="productTotal" placeholder="Amount" class="form-control" v-model="selectedProduct.total" readonly />
+									<input type="text" id="productTotal" placeholder="Amount" class="form-control"
+										v-model="selectedProduct.total" readonly />
+								</div>
+							</div>
+
+							<div class="form-group" v-if="selectedProduct.is_serial == 'yes'">
+								<label class="col-xs-3 control-label no-padding-right"></label>
+
+								<div class="col-xs-9 control-label " style="padding: 0;">
+									<div v-for="serial in serials">
+										<div class="col-xs-8">
+											<input type="text" class="form-control" v-model="serial" />
+										</div>
+										<div class="col-xs-4">
+											<span class="btn btn-xs btn-danger w-100"
+												@click="removeSerial(serial)">x</span>
+										</div>
+									</div>
+									<div class="col-xs-12 p-0">
+										<div class="col-xs-8">
+											<input type="text" class="form-control" v-model="serial" id="add_serial" />
+										</div>
+										<div class="col-xs-4">
+											<label class="btn btn-xs btn-success w-100 p-0" for="add_serial"
+												@click="addSerial">+</label>
+										</div>
+									</div>
 								</div>
 							</div>
 
 							<div class="form-group">
-								<label class="col-xs-7 control-label" for="isFree" style="display: flex;align-items:center;cursor:pointer;">
-									<input type="checkbox" @change="onChangeFreeProduct" style="margin: 0px;width: 16px;height: 16px;cursor:pointer;" id="isFree" :true-value="`yes`" :false-value="`no`" v-model="isFree">
+								<label class="col-xs-7 control-label" for="isFree"
+									style="display: flex;align-items:center;cursor:pointer;">
+									<input type="checkbox" @change="onChangeFreeProduct"
+										style="margin: 0px;width: 16px;height: 16px;cursor:pointer;" id="isFree"
+										:true-value="`yes`" :false-value="`no`" v-model="isFree">
 									<span style="margin: 0px;margin-left: 5px;margin-top: 1px;">Is Free Product</span>
 								</label>
 								<div class="col-xs-5">
-									<button type="button" @click="addToCart" style="padding: 3px 6px; background: rgb(0, 126, 187) !important; border-color: rgb(0, 126, 187) !important; outline: none; border-radius: 6px;" class="btn pull-right">Add to Cart</button>
+									<button type="button" @click="addToCart"
+										style="padding: 3px 6px; background: rgb(0, 126, 187) !important; border-color: rgb(0, 126, 187) !important; outline: none; border-radius: 6px;"
+										class="btn pull-right">Add to Cart</button>
 								</div>
 							</div>
 						</div>
 						<div class="col-md-2">
 							<div style="display:none;" v-bind:style="{display:sales.isService == 'true' ? 'none' : ''}">
-								<div class="text-center" style="display:none;" v-bind:style="{color: productStock > 0 ? 'green' : 'red', display: selectedProduct.Product_SlNo == '' ? 'none' : ''}">{{ productStockText }}</div class="text-center">
+								<div class="text-center" style="display:none;"
+									v-bind:style="{color: productStock > 0 ? 'green' : 'red', display: selectedProduct.Product_SlNo == '' ? 'none' : ''}">
+									{{ productStockText }}</div class="text-center">
 
-								<input type="text" id="productStock" v-model="productStock" readonly style="border:none;font-size:20px;width:100%;text-align:center;color:green"><br>
-								<input type="text" id="stockUnit" v-model="selectedProduct.Unit_Name" readonly style="border:none;font-size:12px;width:100%;text-align: center;"><br><br>
+								<input type="text" id="productStock" v-model="productStock" readonly
+									style="border:none;font-size:20px;width:100%;text-align:center;color:green"><br>
+								<input type="text" id="stockUnit" v-model="selectedProduct.Unit_Name" readonly
+									style="border:none;font-size:12px;width:100%;text-align: center;"><br><br>
 							</div>
-							<input type="password" ref="productPurchaseRate" v-model="selectedProduct.Product_Purchase_Rate" v-on:mousedown="toggleProductPurchaseRate" v-on:mouseup="toggleProductPurchaseRate" readonly title="Purchase rate (click & hold)" style="font-size:12px;width:100%;text-align: center;">
+							<input type="password" ref="productPurchaseRate"
+								v-model="selectedProduct.Product_Purchase_Rate"
+								v-on:mousedown="toggleProductPurchaseRate" v-on:mouseup="toggleProductPurchaseRate"
+								readonly title="Purchase rate (click & hold)"
+								style="font-size:12px;width:100%;text-align: center;">
 						</div>
 					</div>
 				</div>
@@ -254,25 +320,23 @@
 							<th style="width:10%;color:#000;">Sl</th>
 							<th style="width:25%;color:#000;">Description</th>
 							<th style="width:15%;color:#000;">Category</th>
-							<th style="width:15%;color:#000;">Imei</th>
-							<th style="width:10%;color:#000;">Condition</th>
 							<th style="width:7%;color:#000;">Qty</th>
-							<th style="width:8%;color:#000;">Purchase Rate</th>
+							<th style="width:7%;color:#000;">Serial</th>
 							<th style="width:8%;color:#000;">Rate</th>
 							<th style="width:15%;color:#000;">Total</th>
 							<th style="width:10%;color:#000;">Action</th>
 						</tr>
 					</thead>
 					<tbody style="display:none;" v-bind:style="{display: cart.length > 0 ? '' : 'none'}">
-						<tr v-for="(product, sl) in cart" :style="{background: product.isFree == 'yes' ? '#ffd150b3' : ''}" :title="product.isFree == 'yes' ? 'Free Product' : ''">
+						<tr v-for="(product, sl) in cart"
+							:style="{background: product.isFree == 'yes' ? '#ffd150b3' : ''}"
+							:title="product.isFree == 'yes' ? 'Free Product' : ''">
 							<td>{{ sl + 1 }}</td>
 							<td>{{ product.name }} - {{ product.productCode }}</td>
 							<td>{{ product.categoryName }}</td>
-							<td>{{ product.imei }}</td>
-							<td>{{ product.newproduct == 'true' ? 'New' : 'Old' }}</td>
 							<td>{{ product.quantity }}</td>
-							<td>{{ product.purchaseRate }}</td>
-							<td><input type="number" step="0.01" v-model="product.salesRate" v-on:input="change_inline_amount(sl);" ></td>
+							<td>{{ product.serial }}</td>
+							<td>{{ product.salesRate }}</td>
 							<td>{{ product.total }}</td>
 							<td><a href="" v-on:click.prevent="removeFromCart(sl)"><i class="fa fa-trash"></i></a></td>
 						</tr>
@@ -287,7 +351,8 @@
 						</tr>
 
 						<tr>
-							<td colspan="4"><textarea style="width: 100%;font-size:13px;" placeholder="Note" v-model="sales.note"></textarea></td>
+							<td colspan="4"><textarea style="width: 100%;font-size:13px;" placeholder="Note"
+									v-model="sales.note"></textarea></td>
 							<td colspan="3" style="padding-top: 15px;font-size:18px;">{{ sales.total }}</td>
 						</tr>
 					</tbody>
@@ -321,9 +386,11 @@
 									<tr>
 										<td>
 											<div class="form-group">
-												<label class="col-xs-12 control-label no-padding-right">Sub Total</label>
+												<label class="col-xs-12 control-label no-padding-right">Sub
+													Total</label>
 												<div class="col-xs-12">
-													<input type="number" id="subTotal" class="form-control" v-model="sales.subTotal" readonly />
+													<input type="number" id="subTotal" class="form-control"
+														v-model="sales.subTotal" readonly />
 												</div>
 											</div>
 										</td>
@@ -335,25 +402,30 @@
 												<label class="col-xs-12 control-label no-padding-right">Discount</label>
 
 												<div class="col-xs-4">
-													<input type="number" id="discountPercent" class="form-control" v-model="discountPercent" v-on:input="calculateTotal" />
+													<input type="number" id="discountPercent" class="form-control"
+														v-model="discountPercent" v-on:input="calculateTotal" />
 												</div>
 
 												<label class="col-xs-1 control-label no-padding-right">%</label>
 
 												<div class="col-xs-7">
-													<input type="number" id="discount" class="form-control" v-model="sales.discount" v-on:input="calculateTotal" />
+													<input type="number" id="discount" class="form-control"
+														v-model="sales.discount" v-on:input="calculateTotal" />
 												</div>
 
 											</div>
 										</td>
 									</tr>
 
-									<tr v-show="selectedCustomer.is_member == 'yes'" style="display: none;" :style="{display: selectedCustomer.is_member == 'yes' ? '' : 'none'}">
+									<tr v-show="selectedCustomer.is_member == 'yes'" style="display: none;"
+										:style="{display: selectedCustomer.is_member == 'yes' ? '' : 'none'}">
 										<td>
 											<div class="form-group">
-												<label class="col-xs-12 control-label no-padding-right">Use Point</label>
+												<label class="col-xs-12 control-label no-padding-right">Use
+													Point</label>
 												<div class="col-xs-12">
-													<input type="number" id="total" class="form-control" v-model="sales.pointAmount" v-on:input="calculateTotal" />
+													<input type="number" id="total" class="form-control"
+														v-model="sales.pointAmount" v-on:input="calculateTotal" />
 												</div>
 											</div>
 										</td>
@@ -364,7 +436,8 @@
 											<div class="form-group">
 												<label class="col-xs-12 control-label no-padding-right">Total</label>
 												<div class="col-xs-12">
-													<input type="number" id="total" class="form-control" v-model="sales.total" readonly />
+													<input type="number" id="total" class="form-control"
+														v-model="sales.total" readonly />
 												</div>
 											</div>
 										</td>
@@ -376,7 +449,9 @@
 												<label class="col-xs-6 control-label">Cash</label>
 											</div>
 											<div class="col-xs-6">
-												<input type="number" min="0" step="any" id="cashPaid" class="form-control" v-model="sales.cashPaid" v-on:input="calculateTotal" />
+												<input type="number" min="0" step="any" id="cashPaid"
+													class="form-control" v-model="sales.cashPaid"
+													v-on:input="calculateTotal" />
 											</div>
 										</td>
 									</tr>
@@ -384,10 +459,12 @@
 										<td>
 											<div class="form-group">
 												<div class="col-xs-6">
-													<button type="button" @click="showModal" style="width: 100%;">Multiple Bank</button>
+													<button type="button" @click="showModal"
+														style="width: 100%;">Multiple Bank</button>
 												</div>
 												<div class="col-xs-6">
-													<input type="number" min="0" step="any" id="bankPaid" class="form-control" v-model="sales.bankPaid" readonly />
+													<input type="number" min="0" step="any" id="bankPaid"
+														class="form-control" v-model="sales.bankPaid" readonly />
 												</div>
 											</div>
 										</td>
@@ -407,23 +484,27 @@
 									<tr>
 										<td>
 											<div class="form-group">
-												<label class="col-xs-12 control-label no-padding-right">Change Amount</label>
+												<label class="col-xs-12 control-label no-padding-right">Change
+													Amount</label>
 												<div class="col-xs-12">
-													<input type="number" id="returnAmount" class="form-control" v-model="sales.returnAmount" readonly />
+													<input type="number" id="returnAmount" class="form-control"
+														v-model="sales.returnAmount" readonly />
 												</div>
 											</div>
 										</td>
 									</tr>
 
-									<tr >
+									<tr>
 										<td>
 											<div class="form-group">
 												<label class="col-xs-12 control-label">Due</label>
 												<div class="col-xs-6">
-													<input type="number" id="due" class="form-control" v-model="sales.due" readonly />
+													<input type="number" id="due" class="form-control"
+														v-model="sales.due" readonly />
 												</div>
 												<div class="col-xs-6">
-													<input type="number" id="previousDue" class="form-control" v-model="sales.previousDue" readonly style="color:red;" />
+													<input type="number" id="previousDue" class="form-control"
+														v-model="sales.previousDue" readonly style="color:red;" />
 												</div>
 											</div>
 										</td>
@@ -433,10 +514,15 @@
 										<td>
 											<div class="form-group" style="margin-top: 6px;">
 												<div class="col-xs-6">
-													<input type="button" class="btn btn-default btn-sm" value="Sale" v-on:click="saveSales" v-bind:disabled="saleOnProgress ? true : false" style="background: rgb(0, 126, 187) !important; outline: none; border: 0px !important; color: rgb(255, 255, 255) !important; margin-top: 0px; width: 100%; padding: 7px 5px; font-weight: bold; border-radius: 5px;">
+													<input type="button" class="btn btn-default btn-sm" value="Sale"
+														v-on:click="saveSales"
+														v-bind:disabled="saleOnProgress ? true : false"
+														style="background: rgb(0, 126, 187) !important; outline: none; border: 0px !important; color: rgb(255, 255, 255) !important; margin-top: 0px; width: 100%; padding: 7px 5px; font-weight: bold; border-radius: 5px;">
 												</div>
 												<div class="col-xs-6">
-													<a class="btn btn-info btn-sm" v-bind:href="`/sales/${sales.isService == 'true' ? 'service' : 'product'}`" style="background: rgb(209, 91, 71) !important; border: 0px !important; margin-top: 0px; width: 100%; padding: 7px 5px; font-weight: bold; outline: none; border-radius: 5px;">Reset</a>
+													<a class="btn btn-info btn-sm"
+														v-bind:href="`/sales/${sales.isService == 'true' ? 'service' : 'product'}`"
+														style="background: rgb(209, 91, 71) !important; border: 0px !important; margin-top: 0px; width: 100%; padding: 7px 5px; font-weight: bold; outline: none; border-radius: 5px;">Reset</a>
 												</div>
 											</div>
 										</td>
@@ -454,9 +540,12 @@
 	<div class="modal fade bankAccount" tabindex="-1" role="dialog">
 		<div class="modal-dialog modal-md" role="document">
 			<div class="modal-content" style="border-radius: 10px;">
-				<div class="modal-header" style="display: flex; align-items: center; justify-content: space-between;background: #66853e;border-top-left-radius: 10px;border-top-right-radius: 10px;">
+				<div class="modal-header"
+					style="display: flex; align-items: center; justify-content: space-between;background: #66853e;border-top-left-radius: 10px;border-top-right-radius: 10px;">
 					<h5 class="modal-title" style="width:90%;margin: 0;color: #ffffff;">Multiple Bank Account List</h5>
-					<button type="button" style="width: 10%; margin: 0px; display: flex; align-items: center; justify-content: end;" class="close" data-dismiss="modal" aria-label="Close">
+					<button type="button"
+						style="width: 10%; margin: 0px; display: flex; align-items: center; justify-content: end;"
+						class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true" style="margin: 0;font-size: 20px;">X</span>
 					</button>
 				</div>
@@ -464,13 +553,16 @@
 					<form @submit.prevent="bankAddToCart">
 						<div class="row">
 							<div class="col-xs-6">
-								<v-select :options="banks" v-model="selectedBank" label="display_name" @input="onChangeBankAccount"></v-select>
+								<v-select :options="banks" v-model="selectedBank" label="display_name"
+									@input="onChangeBankAccount"></v-select>
 							</div>
 							<div class="col-xs-2">
-								<input type="text" class="form-control" id="last_digit" v-model="selectedBank.last_digit" @input="goToAmount" placeholder="Last 4 digit" />
+								<input type="text" class="form-control" id="last_digit"
+									v-model="selectedBank.last_digit" @input="goToAmount" placeholder="Last 4 digit" />
 							</div>
 							<div class="col-xs-3">
-								<input type="number" step="any" min="0" class="form-control" id="bankAmount" v-model="selectedBank.amount" placeholder="Amount" />
+								<input type="number" step="any" min="0" class="form-control" id="bankAmount"
+									v-model="selectedBank.amount" placeholder="Amount" />
 							</div>
 							<div class="col-xs-1 no-padding-left">
 								<button type="submit">Add</button>
@@ -545,6 +637,8 @@
 					isService: '<?php echo $isService; ?>',
 					note: ''
 				},
+				serials: [],
+				serial: '',
 				vatPercent: 0,
 				discountPercent: 0,
 				isFree: 'no',
@@ -592,8 +686,6 @@
 					vat: 0,
 					total: 0,
 					warranty: '',
-					imei: '',
-					newproduct: false
 				},
 				productPurchaseRate: '',
 				productStockText: '',
@@ -616,30 +708,47 @@
 			}
 
 			document.addEventListener('keydown', (e) => {
-				 if (event.shiftKey && (event.key === 'Enter' || event.keyCode === 13)) {
+				if (event.shiftKey && (event.key === 'Enter' || event.keyCode === 13)) {
 					// Handle Shift + Enter (e.g., submit form)
 					this.saveSales();
-	
-				}else if(event.shiftKey && (event.key === 'p' || event.keyCode === 80)){
-					if(this.barcode){
+
+				} else if (event.shiftKey && (event.key === 'p' || event.keyCode === 80)) {
+					if (this.barcode) {
 						this.barcode = false;
 						setTimeout(() => {
-							 this.$refs.mySelect.$el.querySelector('input').focus();
-						},400)
-					}else{
+							this.$refs.mySelect.$el.querySelector('input').focus();
+						}, 400)
+					} else {
 						this.barcode = true;
 						setTimeout(() => {
 							$('#Productbarcode').focus();
-						},200)
+						}, 200)
 					}
 				}
 
 			})
 			setTimeout(() => {
 				$('#Productbarcode').focus();
-			},200)
+			}, 200)
 		},
 		methods: {
+			addSerial() {
+				if (this.serial == '') {
+					alert('Enter serial No');
+					return;
+				}
+				if (this.serials.includes(this.serial)) {
+					alert('Serial already added');
+					return;
+				}
+				this.serials.push(
+					this.serial
+				)
+				this.serial = '';
+			},
+			removeSerial(serial) {
+				this.serials.splice(this.serials.indexOf(serial), 1);
+			},
 			getBank() {
 				axios.get('/get_bank_accounts').then(res => {
 					this.banks = res.data.map(item => {
@@ -659,11 +768,6 @@
 				}
 				this.clearProduct();
 				this.getProducts();
-			},
-			change_inline_amount(sl) {
-				// console.log(this.cart[sl]);
-				this.cart[sl].total = this.cart[sl].quantity * this.cart[sl].salesRate;
-				this.calculateTotal();
 			},
 
 			getEmployees() {
@@ -715,8 +819,8 @@
 				if (val.length > 2) {
 					loading(true);
 					await axios.post("/get_customers", {
-							name: val,
-						})
+						name: val,
+					})
 						.then(res => {
 							let r = res.data;
 							this.customers = r.filter(item => item.status == 'a')
@@ -804,10 +908,10 @@
 				if (val.length > 2) {
 					loading(true);
 					await axios.post("/get_products", {
-							name: val,
-							isService: this.sales.isService,
-							categoryId: this.selectedCategory == null ? "" : this.selectedCategory.ProductCategory_SlNo
-						})
+						name: val,
+						isService: this.sales.isService,
+						categoryId: this.selectedCategory == null ? "" : this.selectedCategory.ProductCategory_SlNo
+					})
 						.then(res => {
 							let r = res.data;
 							this.products = r.filter(item => item.status == 'a');
@@ -840,10 +944,7 @@
 				this.getProducts();
 			},
 
-			async productOnChange(imei = '') {
-				if(typeof(imei) == 'object') {
-					imei = '';
-				}
+			async productOnChange() {
 				if (this.selectedProduct == null) {
 					this.selectedProduct = {
 						Product_SlNo: '',
@@ -862,11 +963,8 @@
 					if (this.isFree == 'yes') {
 						this.selectedProduct.Product_SellingPrice = 0;
 					}
-					
 					this.productStock = await axios.post('/get_product_stock', {
-						productId: this.selectedProduct.Product_SlNo,
-						imei: imei
-						
+						productId: this.selectedProduct.Product_SlNo
 					}).then(res => {
 						return res.data;
 					})
@@ -882,19 +980,11 @@
 			toggleProductPurchaseRate() {
 				this.$refs.productPurchaseRate.type = this.$refs.productPurchaseRate.type == 'text' ? 'password' : 'text';
 			},
-			async barcodeIMEI(event) {
-				if(event.target.value != ''){
-					await this.barcodeProduct(event, true);
-				}
-				
-			},
-			async barcodeProduct(event, imei = false) {
-				let name_code = event.target.value;
+			async barcodeProduct(event) {
 				await axios.post('/get_products', {
 					isService: this.sales.isService,
 					categoryId: this.selectedCategory == null ? "" : this.selectedCategory.ProductCategory_SlNo,
-					name: name_code,
-					imei: imei
+					name: event.target.value,
 				}).then(async res => {
 					if (this.sales.salesType == 'wholesale') {
 						this.products = res.data;
@@ -910,13 +1000,7 @@
 						this.selectedProduct = prod;
 						this.selectedProduct.quantity = 1;
 						await this.productTotal();
-						
-						if(imei){
-							await this.productOnChange(name_code);
-							this.selectedProduct.imei = name_code;
-						}else{
-							await this.productOnChange();
-						}
+						await this.productOnChange();
 						if (parseFloat(this.productStock) < parseFloat(this.selectedProduct.quantity)) {
 							alert("Stock unavailable");
 							this.barcodeVal = "";
@@ -934,14 +1018,7 @@
 						this.selectedProduct = prod;
 						this.selectedProduct.quantity = 1;
 						await this.productTotal();
-						// await this.productOnChange();
-						if(imei){
-							await this.productOnChange(name_code);
-							this.selectedProduct.imei = name_code;
-							// console.log(name_code);
-						}else{
-							await this.productOnChange();
-						}
+						await this.productOnChange();
 						if (parseFloat(this.productStock) < parseFloat(this.selectedProduct.quantity)) {
 							alert("Stock unavailable");
 							this.barcodeVal = "";
@@ -976,27 +1053,46 @@
 				}
 			},
 			cartCall(event) {
-				if(event.target.value != '' && event.target.value != 0 && event.target.value != null && event.target.value != undefined){
-					this.addToCart(); 
-					// $('#product').focus();
-					  this.$refs.mySelect.$el.querySelector('input').focus();
+				if (event.target.value != '' && event.target.value != 0 && event.target.value != null && event.target.value != undefined) {
+					
+					if(this.selectedProduct.is_serial == 'no'){
+						this.addToCart();
+						// $('#product').focus();
+						this.$refs.mySelect.$el.querySelector('input').focus();
+					}
 
 				}
 			},
 			addToCart() {
+
+				if(this.selectedProduct.is_serial == 'yes'){
+					if(this.serials.length + 1 == this.selectedProduct.quantity && this.serial != ''){
+						this.serials.push(this.serial);
+						this.serial = '';
+					}else if(this.serials.length  != this.selectedProduct.quantity){
+						alert('Enter serial No');
+						return;
+					}
+					
+				}else if(this.selectedProduct.is_serial == 'no'){
+					this.serials = [];
+				}
+
+
 				let product = {
 					productId: this.selectedProduct.Product_SlNo,
 					productCode: this.selectedProduct.Product_Code,
 					categoryName: this.selectedProduct.ProductCategory_Name,
 					name: this.selectedProduct.Product_Name,
-					newproduct: this.selectedProduct.newproduct ? 'true' : 'false',
 					salesRate: this.selectedProduct.Product_SellingPrice,
 					vat: this.selectedProduct.vat,
 					quantity: this.selectedProduct.quantity,
 					total: this.selectedProduct.total,
 					purchaseRate: this.selectedProduct.Product_Purchase_Rate,
-					imei: this.selectedProduct.imei,
-					isFree: this.isFree
+					isFree: this.isFree,
+					is_serial: this.selectedProduct.is_serial,
+					is_old: this.selectedProduct.is_old,
+					serial: this.serials.join(','),
 				}
 
 				if (product.productId == '' && !this.barcode) {
@@ -1008,9 +1104,8 @@
 					alert('Enter quantity');
 					return;
 				}
-// console.log(this.barcode, product.quantity);
-				
 
+				// console.log(this.barcode, product.quantity);
 				// if ((product.salesRate == 0 || product.salesRate == '') && !this.barcode) {
 				// 	alert('Enter sales rate');
 				// 	return;
@@ -1071,10 +1166,10 @@
 				if (event.target.id == 'cashPaid' || this.bankCart.length > 0) {
 					this.sales.paid = parseFloat(parseFloat(this.sales.cashPaid) + parseFloat(this.sales.bankPaid)).toFixed(2);
 					console.log('total paid', this.sales.paid, this.sales.cashPaid, this.sales.bankPaid);
-					if(this.sales.paid == this.sales.total){
+					if (this.sales.paid == this.sales.total) {
 						this.sales.returnAmount = 0;
 						this.sales.due = 0;
-					}else if (parseFloat(this.sales.paid) > parseFloat(this.sales.total)) {
+					} else if (parseFloat(this.sales.paid) > parseFloat(this.sales.total)) {
 						this.sales.returnAmount = parseFloat(this.sales.paid - this.sales.total).toFixed(2);
 						this.sales.due = 0;
 					} else {
@@ -1088,7 +1183,7 @@
 					this.sales.due = 0;
 					this.sales.returnAmount = 0;
 				}
-				
+
 				// this.sales.due =	this.sales.total - this.sales.bankPaid - this.sales.cashPaid
 
 			},
@@ -1112,9 +1207,9 @@
 					document.querySelector('#last_digit').select();
 				}
 			},
-			
-			goToAmount(){
-				if(this.selectedBank.last_digit.length > 3){
+
+			goToAmount() {
+				if (this.selectedBank.last_digit.length > 3) {
 					document.querySelector('#bankAmount').select();
 				}
 			},

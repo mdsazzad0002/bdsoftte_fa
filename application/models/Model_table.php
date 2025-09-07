@@ -729,15 +729,9 @@ class Model_Table extends CI_Model
         return $dueResult;
     }
 
-    public function productStock($productId, $imei = '')
+    public function productStock($productId)
     {
-        $cluse = '';
-        if($imei != '') {
-            $cluse = " and imei = '$imei'";
-        }else{
-            $cluse = " and imei  IS  NULL";
-        }
-        $stockQuery = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ? ". $cluse, [$productId, $this->session->userdata("BRANCHid"),]);
+        $stockQuery = $this->db->query("select * from tbl_currentinventory where product_id = ? and branch_id = ?", [$productId, $this->session->userdata("BRANCHid")]);
         $stockCount = $stockQuery->num_rows();
         $stock = 0;
         if ($stockCount != 0) {
@@ -746,6 +740,37 @@ class Model_Table extends CI_Model
                 - ($stockRow->sales_quantity + $stockRow->purchase_return_quantity + $stockRow->damage_quantity + $stockRow->transfer_from_quantity);
         }
 
+        return $stock;
+    }
+
+    public function serialStock($productId, $serial)
+    {
+        $stockQuery = $this->db->query("select * from tbl_serial where product_id = ? and serial_no = ? ", [$productId, $serial]);
+        $stockCount = $stockQuery->row();
+        $stock = 'no';
+        
+        if (!empty($stockCount)) {
+            $sum = 0;
+            if($stockCount->is_purchase == 'yes' && $stockCount->purchase_details_id){
+                $sum += 1;
+            }
+            if($stockCount->is_return == 'yes' && $stockCount->purchase_return_details_id){
+                $sum -= 1;
+            }
+            if($stockCount->is_sale == 'yes' && $stockCount->sale_details_id){
+                $sum -= 1;
+            }
+            if($stockCount->is_sale_return == 'yes' && $stockCount->sale_return_details_id){
+                $sum += 1;
+            }
+            if($stockCount->is_damage == 'yes' && $stockCount->damage_details_id){
+                $sum -= 1;
+            }
+
+            if($sum > 0){
+                $stock = 'yes';
+            }
+        }
         return $stock;
     }
 

@@ -148,6 +148,18 @@
 					</div>
 				</div>
 				<div class="form-group clearfix">
+					<label class="control-label col-md-4" for="is_serial">Is Serial:</label>
+					<div class="col-md-7">
+						<input type="checkbox" class="" id="is_serial" v-model="product.is_serial" :true-value="'yes'" :false-value="'no'" required>
+					</div>
+				</div>
+				<div class="form-group clearfix">
+					<label class="control-label col-md-4" for="is_old">Is Old:</label>
+					<div class="col-md-7">
+						<input type="checkbox" class="" id="is_old" v-model="product.is_old" :true-value="'yes'" :false-value="'no'" required>
+					</div>
+				</div>
+				<div class="form-group clearfix">
 					<div class="col-md-11 text-right">
 						<input type="submit" class="btn btn-success btn-sm" value="Save">
 					</div>
@@ -191,6 +203,8 @@
 							<td>{{ row.Product_Code }}</td>
 							<td>{{ row.Product_Name }}</td>
 							<td>{{ row.ProductCategory_Name }}</td>
+							<td>{{ row.is_serial }}</td>
+							<td>{{ row.is_old }}</td>
 							<td>{{ row.Product_Purchase_Rate }}</td>
 							<td>{{ row.Product_SellingPrice }}</td>
 							<td>{{ row.Unit_Name }}</td>
@@ -243,7 +257,9 @@
 					Unit_ID: '',
 					vat: 0,
 					note: '',
-					is_service: false
+					is_service: false,
+					is_serial: 'no',
+					is_old: 'no'
 				},
 				imageUrl: '',
 				selectedFile: null,
@@ -278,6 +294,16 @@
 					{
 						label: 'Category',
 						field: 'ProductCategory_Name',
+						align: 'center'
+					},
+					{
+						label: 'Serial',
+						field: 'is_serial',
+						align: 'center'
+					},
+					{
+						label: 'Old',
+						field: 'is_old',
 						align: 'center'
 					},
 					{

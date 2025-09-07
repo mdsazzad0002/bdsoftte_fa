@@ -141,20 +141,18 @@ class Sales extends CI_Controller
                     'SaleDetails_TotalAmount'   => $cartProduct->total,
                     'isFree'                    => $cartProduct->isFree,
                     'Status'                    => 'a',
-                     'imei'                      => $cartProduct->imei,
-                    'newproduct'                => $cartProduct->newproduct,
                     'AddBy'                     => $this->session->userdata("FullName"),
                     'AddTime'                   => date('Y-m-d H:i:s'),
                     'SaleDetails_BranchId'      => $this->session->userdata('BRANCHid')
                 );
 
                 $this->db->insert('tbl_saledetails', $saleDetails);
+                $saleDetailsId = $this->db->insert_id();
 
-                $imei_cluse = '';
-                if($cartProduct->imei != null){
-                    $imei_cluse = " and imei = '$cartProduct->imei'";
-                }else{
-                    $imei_cluse = " and imei  IS  NULL";
+                if($cartProduct->is_serial == 'yes'){
+                    foreach (explode(',', $cartProduct->serial) as $serial) {
+                        $this->db->query("update tbl_serial set is_sale = 'yes', sale_details_id = ? where serial_no = ?", [$saleDetailsId, $serial]);
+                    }
                 }
 
                 //update stock
@@ -163,7 +161,7 @@ class Sales extends CI_Controller
                     set sales_quantity = sales_quantity + ? 
                     where product_id = ?
                     and branch_id = ?
-                ".$imei_cluse, [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
+                ", [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
             }
 
             if (count($data->banks) > 0) {
@@ -384,7 +382,8 @@ class Sales extends CI_Controller
                     p.Product_Name,
                     pc.ProductCategory_Name,
                     u.Unit_Name,
-                    ifnull(ed.exchange_id, 'false') as is_exchange
+                    ifnull(ed.exchange_id, 'false') as is_exchange,
+                    (select group_concat(serial.serial_no separator ',') from tbl_serial serial where serial.sale_details_id = sd.SaleDetails_SlNo) as serial
                 from tbl_saledetails sd
                 join tbl_product p on p.Product_SlNo = sd.Product_IDNo
                 join tbl_productcategory pc on pc.ProductCategory_SlNo = p.ProductCategory_ID
@@ -553,10 +552,7 @@ class Sales extends CI_Controller
                     'SaleDetails_Tax'           => $cartProduct->vat,
                     'SaleDetails_TotalAmount'   => $cartProduct->total,
                     'isFree'                    => $cartProduct->isFree,
-                    'imei'                      => $cartProduct->imei,
-                    'newproduct'                => $cartProduct->newproduct,
                     'Status'                    => 'a',
-                    
                     'AddBy'                     => $this->session->userdata("FullName"),
                     'AddTime'                   => date('Y-m-d H:i:s'),
                     'SaleDetails_BranchId'      => $this->session->userdata("BRANCHid")
@@ -564,19 +560,12 @@ class Sales extends CI_Controller
 
                 $this->db->insert('tbl_saledetails', $saleDetails);
 
-                $imei_cluse = '';
-                if($cartProduct->imei != null){
-                    $imei_cluse = " and imei = '$cartProduct->imei'";
-                }else{
-                    $imei_cluse = " and imei  IS  NULL";
-                }
-
                 $this->db->query("
                     update tbl_currentinventory 
                     set sales_quantity = sales_quantity + ? 
                     where product_id = ?
                     and branch_id = ?
-                ". $imei_cluse, [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
+                ", [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
             }
 
             //old bank list delete

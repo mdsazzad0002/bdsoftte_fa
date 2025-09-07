@@ -50,6 +50,7 @@
 						<th>Amount</th>
 						<th>Already returned quantity</th>
 						<th>Already returned amount</th>
+						<th>Serial</th>
 						<th>Return Quantity</th>
 						<th>Return Rate</th>
 						<th>Return Amount</th>
@@ -63,6 +64,12 @@
 						<td>{{ product.PurchaseDetails_TotalAmount }}</td>
 						<td>{{ product.returned_quantity }}</td>
 						<td>{{ product.returned_amount }}</td>
+						<td>
+							<label v-for="serial in product.serials" style="padding:0px;margin:0px; width: 100%; text-align: left;">
+								<input type="checkbox" v-model="product.return_serials" v-bind:value="serial"> {{ serial }} 
+							</label>
+						
+						</td>
 						<td><input type="text" v-model="product.return_quantity" v-on:input="productReturnTotal(sl)"></td>
 						<td><input type="text" v-model="product.return_rate" v-on:input="productReturnTotal(sl)"></td>
 						<td>{{ product.return_amount }}</td>
@@ -109,6 +116,7 @@
 				returnDetails: [],
 				checkStock: true,
 				save_disabled: false,
+			
 			}
 		},
 		created(){
@@ -130,6 +138,10 @@
 				}
 				await axios.post('/get_purchasedetails_for_return', {purchaseId: this.selectedInvoice.PurchaseMaster_SlNo}).then(res=>{
 					this.cart = res.data;
+					this.cart.map(c => {
+						c.serials = c.serial_numbers ? c.serial_numbers.split(',').filter(s => s != '') : [];
+						c.return_serials = [];
+					})
 				})
 			},
 			async productReturnTotal(ind){
@@ -177,6 +189,17 @@
 					alert('Enter date');
 					return;
 				}
+
+				filteredCart.forEach(element => {
+					console.log(element);
+					if(element.is_serial == 'yes'){
+						if(element.return_serials.length != element.return_quantity){
+							alert('Please checkout  return serials no')
+							return;
+						}
+					}
+				});
+			
 
 				let data = {
 					invoice: this.selectedInvoice,

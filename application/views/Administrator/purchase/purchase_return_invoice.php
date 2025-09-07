@@ -40,6 +40,7 @@
 								<tr>
 									<td>Sl.</td>
 									<td>Description</td>
+									<td>Serial</td>
 									<td>Quantity</td>
 									<td>Total</td>
 								</tr>
@@ -48,11 +49,12 @@
 								<tr v-for="(product, sl) in cart">
 									<td>{{ sl + 1 }}</td>
 									<td>{{ product.Product_Code }} - {{ product.Product_Name }}</td>
+									<td>{{ product.serial ? product.serial : 'N/A' }}</td>
 									<td>{{ product.PurchaseReturnDetails_ReturnQuantity }}</td>
 									<td style="text-align:right;">{{ product.PurchaseReturnDetails_ReturnAmount }}</td>
 								</tr>
 								<tr style="font-weight:bold;">
-									<td colspan="3" style="text-align:right">Total</td>
+									<td colspan="4" style="text-align:right">Total</td>
 									<td style="text-align:right">{{ purchaseReturn.PurchaseReturn_ReturnAmount }}</td>
 								</tr>
 							</tbody>
